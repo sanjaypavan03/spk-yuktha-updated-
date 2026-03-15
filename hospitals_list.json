@@ -1,0 +1,24 @@
+[
+  {
+    "id": "6978c9933501732233a97a0d",
+    "name": "mamtha",
+    "email": "mamtha@gmail.com",
+    "roles": [
+      "doctor",
+      "pharmacy"
+    ],
+    "status": "Active",
+    "contactNumber": ""
+  },
+  {
+    "id": "697994fc08c9828e1d250d8c",
+    "name": "sevenhills",
+    "email": "sevenhills@gmail.com",
+    "roles": [
+      "doctor",
+      "pharmacy"
+    ],
+    "status": "Active",
+    "contactNumber": "12345566777"
+  }
+]

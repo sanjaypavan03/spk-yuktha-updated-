@@ -1,0 +1,33 @@
+﻿{
+    "info":  {
+                 "User":  {
+                              "hasSavePre":  false,
+                              "savePreCount":  0,
+                              "savePreDetails":  [
+
+                                                 ]
+                          },
+                 "Hospital":  {
+                                  "hasSavePre":  false,
+                                  "savePreCount":  0,
+                                  "savePreDetails":  [
+
+                                                     ]
+                              },
+                 "Admin":  {
+                               "hasSavePre":  false,
+                               "savePreCount":  0,
+                               "savePreDetails":  [
+
+                                                  ]
+                           },
+                 "HospitalPartner":  {
+                                         "hasSavePre":  false,
+                                         "savePreCount":  0,
+                                         "savePreDetails":  [
+
+                                                            ]
+                                     },
+                 "globalPlugins":  4
+             }
+}

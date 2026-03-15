@@ -1,0 +1,53 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "fam1",
+      "description": "Portrait of a young girl, Emily Doe.",
+      "imageUrl": "https://picsum.photos/seed/fam1/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "fam2",
+      "description": "Portrait of an elderly man, George Doe.",
+      "imageUrl": "https://picsum.photos/seed/fam2/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "pat1",
+      "description": "Avatar for patient John Doe.",
+      "imageUrl": "https://picsum.photos/seed/pat1/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "pat2",
+      "description": "Avatar for patient Alice Johnson.",
+      "imageUrl": "https://picsum.photos/seed/pat2/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "pat3",
+      "description": "Avatar for patient Robert Williams.",
+      "imageUrl": "https://picsum.photos/seed/pat3/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Generic user avatar.",
+      "imageUrl": "https://picsum.photos/seed/user-avatar/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "doc-avatar",
+      "description": "Generic doctor avatar.",
+      "imageUrl": "https://picsum.photos/seed/doc-avatar/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "qr-code",
+      "description": "Placeholder QR code.",
+      "imageUrl": "https://picsum.photos/seed/qr-code/200/200",
+      "imageHint": "qr code"
+    }
+  ]
+}
