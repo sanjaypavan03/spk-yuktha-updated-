@@ -1,14 +1,29 @@
 "use client";
 
 import { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from "@/components/ui/card";
 import { Lock, Shield, FileText, Activity, Image as ImageIcon, Pill, ChevronDown } from "lucide-react";
 import { format } from 'date-fns';
+import { SecretVaultModal } from "@/components/dashboard/secret-vault-modal";
 
 export default function VaultPage() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
     const [reports, setReports] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('All');
+    const [isVerified, setIsVerified] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const verified = searchParams.get('verified') === 'true';
+        if (verified) {
+            setIsVerified(true);
+        } else {
+            setIsModalOpen(true);
+        }
+    }, [searchParams]);
 
     const categories = ['All', 'Blood Reports', 'Scans & Imaging', 'Prescriptions'];
 
@@ -37,8 +52,25 @@ export default function VaultPage() {
     };
 
     useEffect(() => {
-        fetchReports(selectedCategory);
-    }, [selectedCategory]);
+        if (isVerified) {
+            fetchReports(selectedCategory);
+        }
+    }, [selectedCategory, isVerified]);
+
+    if (!isVerified) {
+        return (
+            <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+                <SecretVaultModal 
+                    isOpen={isModalOpen}
+                    onClose={() => router.push('/dashboard')}
+                    onSuccess={() => {
+                        setIsVerified(true);
+                        setIsModalOpen(false);
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 pb-24 sm:pb-8 font-sans bg-[#F8FAFC] min-h-screen">

@@ -12,7 +12,7 @@ import { useEmergencyInfo } from "@/context/emergency-info-context";
 import { useAuth } from "@/context/auth-context";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Edit2, BadgeCheck, AlertCircle, HeartPulse, Activity } from "lucide-react";
+import { Edit2, BadgeCheck, AlertCircle, HeartPulse, Activity, X } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -170,7 +170,14 @@ export function EmergencyInfoModal() {
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DialogContent className="sm:max-w-xl max-h-[90vh] flex flex-col p-0 overflow-hidden shadow-2xl border-0 bg-slate-50">
-        <DialogHeader className="p-6 pb-4 border-b bg-white z-10">
+        <DialogHeader className="p-6 pb-4 border-b bg-white z-10 relative">
+          <button 
+            onClick={() => setIsModalOpen(false)}
+            className="absolute right-4 top-4 p-2 rounded-full hover:bg-slate-100 transition-colors z-[60]"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
           <DialogTitle className="font-playfair text-2xl font-bold tracking-tight text-slate-900 flex justify-between items-center">
             Emergency File
             {isComplete ? (
@@ -421,8 +428,21 @@ export function EmergencyInfoModal() {
 
         </div>
 
-        <DialogFooter className="p-4 border-t bg-white z-20 sticky bottom-0 w-full shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
-          <Button type="button" onClick={handleSubmit} className="w-full h-14 text-lg font-bold shadow-xl shadow-primary/20 rounded-xl" disabled={isSaving}>
+        <DialogFooter className="p-4 border-t bg-white z-20 sticky bottom-0 w-full shadow-[0_-10px_30px_rgba(0,0,0,0.05)] sm:flex-row flex-col gap-2">
+          <Button 
+            type="button" 
+            variant="ghost" 
+            onClick={() => setIsModalOpen(false)} 
+            className="w-full sm:w-auto h-14 sm:h-auto font-bold text-slate-500 hover:text-slate-800"
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="button" 
+            onClick={handleSubmit} 
+            className="flex-1 h-14 text-lg font-bold shadow-xl shadow-primary/20 rounded-xl" 
+            disabled={isSaving}
+          >
             {isSaving ? 'Saving Changes...' : 'Save Emergency File'}
           </Button>
         </DialogFooter>

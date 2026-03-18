@@ -31,13 +31,37 @@ export async function POST(request: NextRequest) {
         const prompt = `
 You are a medical AI assistant. Extract the following from the raw lab report text below.
 Format your response as a STRICT JSON object (no markdown tags, just pure JSON).
-The JSON object must have three fields:
-1. "reportTitle": A concise, clear title for the report (e.g., "Complete Blood Count", "MRI Scan").
-2. "category": Must be exactly one of: "blood", "imaging", "prescription", or "other".
+Identify the report type and categorize it STRICTLY INTO ONE of these 9 categories:
+- mri
+- ultrasound
+- blood
+- urine
+- ecg
+- thyroid
+- diabetes
+- allergy
+- others
+
+Mapping logic:
+- Blood report/tests -> blood
+- MRI/Brain scans -> mri
+- Ultrasound/Sonography -> ultrasound
+- ECG/Heart rhythm/Pulse -> ecg
+- Urine analysis -> urine
+- Thyroid/T3/T4/TSH -> thyroid
+- Sugar/HbA1c/Glucose -> diabetes
+- Allergens/IgE -> allergy
+- If unsure -> others
+
+The JSON object must have these fields:
+1. "reportTitle": A concise, clear title for the report (e.g., "Complete Blood Count", "MRI Brain Scan").
+2. "category": exactly one of the 9 categories above.
 3. "analysisText": A simplified, patient-friendly summary of the report in 2-3 sentences. Do not provide medical advice.
+4. "parameters": An array of objects: { "test": "Name of test", "value": "numeric or text value", "unit": "unit like mg/dL or nil", "status": "Normal/High/Low/Abnormal", "referenceRange": "e.g. 70-100" }
+5. "abnormalFindings": A string array of briefly described abnormal results found.
 
 Raw Text:
-${rawText}
+${rawText.substring(0, 5000)}
 `;
 
         console.log('🧪 Vault Analyze: Starting Gemini Generation...');
@@ -62,6 +86,8 @@ ${rawText}
                 reportTitle: parsedData.reportTitle,
                 category: parsedData.category,
                 analysisText: parsedData.analysisText,
+                parameters: parsedData.parameters || [],
+                abnormalFindings: parsedData.abnormalFindings || [],
                 rawData: rawText
             }
         });

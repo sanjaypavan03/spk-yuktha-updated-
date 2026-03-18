@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Home, Pill, Plus, FileText, User, Calendar } from "lucide-react";
+import { Home, Pill, Plus, FileText, User, Calendar, QrCode } from "lucide-react";
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
@@ -57,6 +57,10 @@ export function BottomNavbar() {
                                         <button onClick={() => handleAction('/dashboard/appointments')} className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
                                             <span className="font-semibold text-sm text-slate-700">Book Appointment</span>
                                             <div className="bg-[#02B69A]/20 text-[#018A75] p-1.5 rounded-full"><Calendar className="w-4 h-4" /></div>
+                                        </button>
+                                        <button onClick={() => handleAction('/dashboard/emergency-qr')} className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
+                                            <span className="font-semibold text-sm text-slate-700 font-bold text-red-600">Emergency QR</span>
+                                            <div className="bg-red-100 text-red-600 p-1.5 rounded-full"><QrCode className="w-4 h-4" /></div>
                                         </button>
                                     </div>
 

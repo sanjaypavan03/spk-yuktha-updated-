@@ -95,9 +95,24 @@ export type EmergencyInfo = {
     allergiesOther: string;
     medications: string;
     medicationsOther: string;
-    emergencyContact: string; // Stored as string "Name - Phone"
+    emergencyContact: string; 
     chronicConditions: string;
     medicalNotes: string;
+    // New Fields
+    knownAllergies?: boolean;
+    allergiesDetails?: string;
+    currentMedications?: string;
+    emergencyContact1Name?: string;
+    hasPacemakerOrImplant?: boolean;
+    height?: string;
+    smokingStatus?: string;
+    alcoholUse?: string;
+    physicalActivityLevel?: string;
+    pastSurgeries?: { name: string; year: string }[];
+    emergencyContact2Name?: string;
+    familyMedicalHistory?: string;
+    insuranceProvider?: string;
+    additionalNotes?: string;
 }
 
 export const mockEmergencyInfo: EmergencyInfo = {

@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
 
         const { searchParams } = new URL(request.url);
         const categoryFilter = searchParams.get('category');
+        const limitParam = searchParams.get('limit');
+        const limit = limitParam ? parseInt(limitParam) : 0;
 
         let query: any = { userId: authUser.userId };
 
@@ -27,7 +29,13 @@ export async function GET(request: NextRequest) {
         }
 
         const Report = await getReportModel();
-        const reports = await Report.find(query).sort({ date: -1, createdAt: -1 });
+        let mongoQuery = Report.find(query).sort({ date: -1, createdAt: -1 });
+        
+        if (limit > 0) {
+            mongoQuery = mongoQuery.limit(limit);
+        }
+
+        const reports = await mongoQuery;
 
         return NextResponse.json({
             success: true,

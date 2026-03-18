@@ -74,10 +74,9 @@ export default function DashboardPage() {
           <div className="flex gap-4 sm:gap-12 overflow-hidden">
             {healthScore && (
               <div className="flex-1 bg-white/10 rounded-2xl p-4 backdrop-blur-sm border border-white/20">
-                <p className="text-xs sm:text-sm text-green-100 font-medium mb-1">Health Score</p>
+                <p className="text-xs sm:text-sm text-green-100 font-medium mb-1">Adherence Score</p>
                 <div className="flex items-baseline gap-1">
-                  <p className="text-3xl font-bold">{healthScore.score}</p>
-                  <span className="text-sm opacity-70">/100</span>
+                  <p className="text-3xl font-bold">{healthScore.score}%</p>
                 </div>
                 {healthScore.trend === 'up' && <span className="text-[10px] bg-green-400/20 px-2 py-0.5 rounded-full mt-2 inline-block">↑ Improving</span>}
                 {healthScore.trend === 'down' && <span className="text-[10px] bg-red-400/20 px-2 py-0.5 rounded-full mt-2 inline-block">↓ Needs Attention</span>}
@@ -192,7 +191,6 @@ export default function DashboardPage() {
           <div className="flex overflow-x-auto pb-4 gap-4 snap-x hide-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
             {[
               { label: "Med Tracker", href: "/dashboard/med-tracker", icon: Pill, color: "bg-blue-50 text-blue-600" },
-              { label: "Vault", href: "/dashboard/vault", icon: FileText, color: "bg-purple-50 text-purple-600" },
               { label: "Family", href: "/dashboard/family", icon: Users, color: "bg-orange-50 text-orange-600" },
               { label: "Emergency", href: "/dashboard/emergency-qr", icon: QrCode, color: "bg-red-50 text-red-600" },
             ].map((item, idx) => (
@@ -210,6 +208,7 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
 
       <style jsx global>{`
         .hide-scrollbar::-webkit-scrollbar {

@@ -11,7 +11,7 @@ interface User {
   lastName?: string;
   qrCode?: string;
   qrPublicUrl?: string | null;
-  emergencyDetailsCompleted?: boolean;
+  dateOfBirth?: string;
   role: 'user' | 'admin' | 'hospital' | 'doctor';
   hospitalRoles?: string[];
   specialty?: string;

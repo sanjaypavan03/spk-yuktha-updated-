@@ -13,26 +13,33 @@ export async function POST(request: NextRequest) {
         await dbConnect();
 
         const body = await request.json();
-        const { category, reportTitle, analysisText, rawData } = body;
+        const { category, reportTitle, analysisText, rawData, parameters, abnormalFindings, clinic, date } = body;
 
         if (!category || !reportTitle) {
             return NextResponse.json({ error: 'Category and report Title are required' }, { status: 400 });
         }
 
-        const finalCategory = ['blood', 'imaging', 'prescription', 'other'].includes(category.toLowerCase())
-            ? category.toLowerCase() : 'other';
+        const validCategories = ['mri', 'ultrasound', 'blood', 'urine', 'ecg', 'thyroid', 'diabetes', 'allergy', 'others'];
+        const finalCategory = validCategories.includes(category.toLowerCase())
+            ? category.toLowerCase() : 'others';
 
         const Report = await getReportModel();
+        // Consolidate into the existing schema structure
         const report = await Report.create({
             userId: authUser.userId,
             title: reportTitle,
-            category: finalCategory,
-            summary: analysisText || 'No detailed analysis produced.',
+            type: finalCategory,
+            date: date ? new Date(date) : new Date(),
+            clinic: clinic || 'Unknown Center',
+            analysis: {
+                summary: analysisText || 'Analysis complete.',
+                parameters: parameters || [],
+                abnormalFindings: abnormalFindings || [],
+                rawData: rawData
+            }
         });
 
-        const categoryPretty = finalCategory === 'imaging' ? 'Scans & Imaging' :
-            finalCategory === 'prescription' ? 'Prescriptions' :
-                finalCategory === 'blood' ? 'Blood Reports' : 'Other';
+        const categoryPretty = finalCategory.charAt(0).toUpperCase() + finalCategory.slice(1);
 
         return NextResponse.json({
             success: true,

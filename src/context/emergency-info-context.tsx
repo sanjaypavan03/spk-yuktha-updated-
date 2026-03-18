@@ -41,7 +41,22 @@ const getDefaultInfo = (): EmergencyInfo => ({
   medicationsOther: '',
   emergencyContact: '',
   chronicConditions: '',
-  medicalNotes: ''
+  medicalNotes: '',
+  // New Fields
+  knownAllergies: false,
+  allergiesDetails: '',
+  currentMedications: '',
+  emergencyContact1Name: '',
+  hasPacemakerOrImplant: false,
+  height: '',
+  smokingStatus: '',
+  alcoholUse: '',
+  physicalActivityLevel: '',
+  pastSurgeries: [],
+  emergencyContact2Name: '',
+  familyMedicalHistory: '',
+  insuranceProvider: '',
+  additionalNotes: ''
 });
 
 export const EmergencyInfoProvider = ({ children }: { children: ReactNode }) => {
@@ -63,10 +78,12 @@ export const EmergencyInfoProvider = ({ children }: { children: ReactNode }) => 
           // FORCE SANITIZATION: Ensure every field is the correct type
           Object.keys(sanitized).forEach(key => {
             const val = rawData[key];
-            if (key === 'hasPastSurgery') {
+            if (['hasPastSurgery', 'knownAllergies', 'hasPacemakerOrImplant'].includes(key)) {
               sanitized[key] = !!val;
+            } else if (key === 'pastSurgeries') {
+              sanitized[key] = Array.isArray(val) ? val : [];
             } else {
-              // If it's an array, join it. If it's anything else, make it a string.
+              // If it's an array for a string field, join it. If it's anything else, make it a string.
               if (Array.isArray(val)) {
                 sanitized[key] = val.join(', ');
               } else {

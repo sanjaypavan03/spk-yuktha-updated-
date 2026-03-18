@@ -3,14 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/auth-context';
 import { useEmergencyInfo } from '@/context/emergency-info-context';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Activity, Phone, HeartPulse, Stethoscope, Droplet, User as UserIcon, Edit2 } from "lucide-react";
+import { AlertTriangle, Activity, Phone, HeartPulse, Stethoscope, Droplet, User as UserIcon, Edit2, ArrowLeft } from "lucide-react";
 import { useToast } from '@/hooks/use-toast';
 
 export default function EmergencyQRPage() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const router = useRouter();
   const { setIsModalOpen } = useEmergencyInfo();
 
   const [medicalInfo, setMedicalInfo] = useState<any>(null);
@@ -50,6 +52,13 @@ export default function EmergencyQRPage() {
 
       {/* Red Alert Style Header */}
       <div className="bg-red-500 rounded-b-[32px] sm:rounded-2xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden -mx-4 -mt-4 sm:mx-0 sm:mt-0">
+        <button 
+            onClick={() => router.back()}
+            className="absolute left-6 top-8 p-3 bg-white/10 rounded-full hover:bg-white/20 transition-all z-30 active:scale-95"
+            aria-label="Go back"
+        >
+            <ArrowLeft className="w-5 h-5 text-white" />
+        </button>
         <div className="relative z-10 flex flex-col items-center text-center pt-2">
           <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl mb-4 border-4 border-red-400">
             <AlertTriangle className="w-8 h-8 text-red-500" />
