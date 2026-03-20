@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json();
-        const { rawText } = body;
-        console.log('🧪 Vault Analyze: rawText length:', rawText?.length);
+        const { rawText, language = "English" } = body;
+        console.log('🧪 Vault Analyze: rawText length:', rawText?.length, 'Language:', language);
 
         if (!rawText) {
             return NextResponse.json({ error: 'Raw text is required' }, { status: 400 });
@@ -31,6 +31,9 @@ export async function POST(request: NextRequest) {
         const prompt = `
 You are a medical AI assistant. Extract the following from the raw lab report text below.
 Format your response as a STRICT JSON object (no markdown tags, just pure JSON).
+
+CRITICAL: Generate the content for "reportTitle", "analysisText", "test" names, and "abnormalFindings" in the ${language} language.
+
 Identify the report type and categorize it STRICTLY INTO ONE of these 9 categories:
 - mri
 - ultrasound
@@ -54,11 +57,11 @@ Mapping logic:
 - If unsure -> others
 
 The JSON object must have these fields:
-1. "reportTitle": A concise, clear title for the report (e.g., "Complete Blood Count", "MRI Brain Scan").
-2. "category": exactly one of the 9 categories above.
-3. "analysisText": A simplified, patient-friendly summary of the report in 2-3 sentences. Do not provide medical advice.
-4. "parameters": An array of objects: { "test": "Name of test", "value": "numeric or text value", "unit": "unit like mg/dL or nil", "status": "Normal/High/Low/Abnormal", "referenceRange": "e.g. 70-100" }
-5. "abnormalFindings": A string array of briefly described abnormal results found.
+1. "reportTitle": A concise, clear title for the report in ${language}.
+2. "category": exactly one of the 9 categories above (keep category keys in English).
+3. "analysisText": A simplified, patient-friendly summary of the report in ${language} (2-3 sentences).
+4. "parameters": An array of objects: { "test": "Name of test in ${language}", "value": "numeric or text value", "unit": "unit like mg/dL or nil", "status": "Normal/High/Low/Abnormal", "referenceRange": "e.g. 70-100" }
+5. "abnormalFindings": A string array of briefly described abnormal results found in ${language}.
 
 Raw Text:
 ${rawText.substring(0, 5000)}

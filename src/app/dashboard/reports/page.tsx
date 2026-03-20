@@ -46,11 +46,19 @@ export default function ReportsPage() {
     const router = useRouter();
     const { toast } = useToast();
     
+    const languages = [
+        "English", "Assamese", "Bengali", "Bodo", "Dogri", "Gujarati", "Hindi", 
+        "Kannada", "Kashmiri", "Konkani", "Maithili", "Malayalam", "Manipuri (Meitei)", 
+        "Marathi", "Nepali", "Odia", "Punjabi", "Sanskrit", "Santali", "Sindhi", 
+        "Tamil", "Telugu", "Urdu"
+    ];
+
     // UI States
     const [activeTab, setActiveTab] = useState<'upload' | 'paste'>('upload');
     const [loading, setLoading] = useState(false);
     const [successState, setSuccessState] = useState(false);
     const [extractedData, setExtractedData] = useState<any>(null);
+    const [selectedLanguage, setSelectedLanguage] = useState('English');
     
     // Form States
     const [reportTitle, setReportTitle] = useState('');
@@ -106,7 +114,10 @@ export default function ReportsPage() {
             const analyzeRes = await fetch('/api/vault/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rawText: textToAnalyze })
+                body: JSON.stringify({ 
+                    rawText: textToAnalyze,
+                    language: selectedLanguage 
+                })
             });
 
             const analyzeData = await analyzeRes.json();
@@ -220,6 +231,29 @@ export default function ReportsPage() {
                 </div>
                 {/* Abstract background glow */}
                 <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-indigo-500/20 rounded-full blur-[80px] sm:blur-[100px] -mr-32 -mt-32 sm:-mr-48 sm:-mt-48"></div>
+            </div>
+
+            {/* AI Language Selection - Persistent */}
+            <div className="bg-white/50 backdrop-blur-sm border border-slate-100/50 rounded-3xl p-4 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shadow-sm border border-indigo-100/50">
+                        <Sparkles className="w-6 h-6" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm sm:text-base font-bold text-slate-800">AI Analysis Language</h3>
+                        <p className="text-[10px] sm:text-xs text-slate-400 font-medium tracking-tight">Select your preferred language for clinical insights</p>
+                    </div>
+                </div>
+                <div className="relative w-full sm:w-64">
+                    <select 
+                        value={selectedLanguage}
+                        onChange={(e) => setSelectedLanguage(e.target.value)}
+                        className="w-full pl-5 pr-10 py-3 bg-white border border-slate-200 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 transition-all font-bold cursor-pointer text-xs sm:text-sm shadow-sm"
+                    >
+                        {languages.map(lang => <option key={lang} value={lang}>{lang}</option>)}
+                    </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
             </div>
 
             {/* Main Interaction Area */}

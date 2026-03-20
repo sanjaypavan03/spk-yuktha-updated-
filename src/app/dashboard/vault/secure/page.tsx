@@ -248,19 +248,19 @@ export default function SecureVaultPage() {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-2 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="grid grid-cols-3 xs:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           {categories.map((cat, idx) => (
             <Card 
               key={cat.id} 
               onClick={() => setSelectedCat(cat)}
-              className={`cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border-none rounded-[28px] sm:rounded-[40px] overflow-hidden group shadow-sm bg-white ring-1 ring-slate-100`}
+              className={`cursor-pointer hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border-none rounded-[20px] sm:rounded-[40px] overflow-hidden group shadow-sm bg-white ring-1 ring-slate-100`}
             >
               <CardContent className="p-0">
-                <div className={`p-5 sm:p-8 aspect-square flex flex-col items-center justify-center text-center transition-all duration-500 group-hover:bg-white/90 ${cat.bg}`}>
-                  <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-[28px] mb-3 sm:mb-6 flex items-center justify-center transition-all duration-700 group-hover:scale-110 sm:group-hover:rotate-6 bg-white border border-white/40 shadow-sm ring-4 ring-white/10`}>
-                    <cat.icon className={`w-7 h-7 sm:w-10 sm:h-10 ${cat.color} group-hover:scale-110 transition-transform duration-500`} strokeWidth={1.5} />
+                <div className={`p-3 sm:p-8 aspect-square flex flex-col items-center justify-center text-center transition-all duration-500 group-hover:bg-white/90 ${cat.bg}`}>
+                  <div className={`w-10 h-10 sm:w-20 sm:h-20 rounded-xl sm:rounded-[28px] mb-2 sm:mb-6 flex items-center justify-center transition-all duration-700 group-hover:scale-110 sm:group-hover:rotate-6 bg-white border border-white/40 shadow-sm ring-4 ring-white/10`}>
+                    <cat.icon className={`w-5 h-5 sm:w-10 sm:h-10 ${cat.color} group-hover:scale-110 transition-transform duration-500`} strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-sm sm:text-xl font-bold text-slate-800 font-playfair mb-0 sm:mb-1.5 group-hover:text-black transition-colors">{cat.label}</h3>
+                  <h3 className="text-[10px] sm:text-xl font-bold text-slate-800 font-playfair mb-0 sm:mb-1.5 group-hover:text-black transition-colors line-clamp-1">{cat.label}</h3>
                   <div className="hidden sm:flex items-center gap-1.5 opacity-0 group-hover:opacity-100 translate-y-3 group-hover:translate-y-0 transition-all duration-500 mt-2">
                     <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">Select Archive</span>
                     <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
