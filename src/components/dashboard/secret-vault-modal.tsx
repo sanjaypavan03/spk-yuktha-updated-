@@ -21,9 +21,10 @@ export function SecretVaultModal({ isOpen, onClose, onSuccess }: SecretVaultModa
     const [langIndex, setLangIndex] = useState(0);
 
     const languages = [
-        "सुरक्षित", "Secure", "Seguro", "Sécurisé", "Sicher", "Sicuro", "Надежный", 
-        "安全", "安全", "안전한", "آمن", "Güvenli", "Veilig", "Säker", "Ασφαλής", 
-        "מאובטח", "ปลอดภัย", "An toàn", "Aman", "Selamat", "সুরক্ষিত", "Saugus"
+        "সুৰক্ষিত", "নিরাপদ", "রৈখাথি", "सुरक्षित", "સુરક્ષિત", "सुरक्षित", 
+        "ಸುರಕ್ಷಿತ", "محفوظ", "সুরক্ষিত", "सुरक्षित", "സുരക്ഷിത", "ঙাক-শেনবা", 
+        "सुरक्षित", "सुरक्षित", "ସୁରକ୍ଷିତ", "ਸੁਰੱਖਿਅত", "सुरक्षितम्", "ᱥᱩᱨᱚᱠᱷᱤᱛ", 
+        "محفوظ", "பாதுகாப்பான", "సురక్షిత", "محفوظ"
     ];
 
     useEffect(() => {
@@ -33,7 +34,7 @@ export function SecretVaultModal({ isOpen, onClose, onSuccess }: SecretVaultModa
             setError(false);
             const interval = setInterval(() => {
                 setLangIndex((prev) => (prev + 1) % languages.length);
-            }, 2000);
+            }, 800);
             return () => clearInterval(interval);
         }
     }, [isOpen, languages.length]);
@@ -108,32 +109,32 @@ export function SecretVaultModal({ isOpen, onClose, onSuccess }: SecretVaultModa
             />
 
             {/* Modal Content - Refined Small Size with Premium Animation */}
-            <div className={`relative w-full max-w-[280px] sm:max-w-[320px] bg-[#0F172ACF] border border-white/10 rounded-[40px] p-6 shadow-2xl backdrop-blur-3xl animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-500 ease-out-expo ${shake ? 'animate-shake' : ''}`}>
+            <div className={`relative w-full max-w-[280px] sm:max-w-[290px] bg-[#0F172ACF] border border-white/10 rounded-[32px] p-5 shadow-2xl backdrop-blur-3xl animate-in fade-in zoom-in-95 slide-in-from-bottom-2 duration-500 ease-out-expo ${shake ? 'animate-shake' : ''}`}>
                 <button 
                     onClick={onClose}
-                    className="absolute right-5 top-5 p-1.5 text-slate-500 hover:text-white bg-white/5 rounded-full transition-colors border border-white/5"
+                    className="absolute right-4 top-4 p-1.5 text-slate-500 hover:text-white bg-white/5 rounded-full transition-colors border border-white/5"
                 >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                 </button>
 
-                <div className="text-center mb-8 mt-2">
-                    <div className="w-14 h-14 bg-emerald-500/10 rounded-[22px] flex items-center justify-center mx-auto mb-4 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-                        <Lock className="w-7 h-7 text-emerald-500" strokeWidth={2.5} />
+                <div className="text-center mb-5 mt-1">
+                    <div className="w-11 h-11 bg-emerald-500/10 rounded-[18px] flex items-center justify-center mx-auto mb-3 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                        <Lock className="w-6 h-6 text-emerald-500" strokeWidth={2.5} />
                     </div>
-                    <h2 className="text-[22px] font-bold text-white font-playfair mb-2 tracking-tight">
-                        Your reports are <span className="text-emerald-400 inline-block min-w-[100px] transition-all duration-500">{languages[langIndex]}</span>
+                    <h2 className="text-[19px] font-bold text-white font-playfair mb-1 tracking-tight">
+                        Your reports are <span className="text-emerald-400 inline-block min-w-[80px] transition-all duration-300">{languages[langIndex]}</span>
                     </h2>
-                    <p className="text-slate-400 text-[14px] font-medium opacity-70">Verify your PIN to continue</p>
+                    <p className="text-slate-400 text-[13px] font-medium opacity-70">Verify your PIN to continue</p>
                 </div>
 
                 {/* PIN Display */}
-                <div className="flex justify-center gap-3 mb-8">
+                <div className="flex justify-center gap-2.5 mb-5">
                     {pin.map((digit, idx) => (
                         <div
                             key={idx}
-                            className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold transition-all duration-300 border-2 ${
-                                error ? 'border-red-500/50 text-red-400 bg-red-500/5 shadow-[0_0_15px_rgba(239,68,68,0.1)]' : 
-                                digit ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.1)]' : 'border-white/10 bg-white/5 text-transparent'
+                            className={`w-8 h-8 rounded-full flex items-center justify-center text-base font-bold transition-all duration-200 border-2 ${
+                                error ? 'border-red-500/50 text-red-400 bg-red-500/5' : 
+                                digit ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-400' : 'border-white/10 bg-white/5 text-transparent'
                             }`}
                         >
                             ●
@@ -142,51 +143,51 @@ export function SecretVaultModal({ isOpen, onClose, onSuccess }: SecretVaultModa
                 </div>
 
                 {/* Numberpad Grid */}
-                <div className="grid grid-cols-3 gap-3 mb-6 px-1">
+                <div className="grid grid-cols-3 gap-2.5 mb-5 px-0.5">
                     {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map(num => (
                         <button
                             key={num}
                             onClick={() => handleNumberClick(num)}
-                            className="h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xl font-bold text-white active:scale-95 transition-all font-sans"
+                            className="h-11 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-lg font-bold text-white active:scale-95 transition-all font-sans"
                         >
                             {num}
                         </button>
                     ))}
                     <button
                         onClick={handleClear}
-                        className="h-12 flex items-center justify-center bg-white/5 hover:bg-red-500/10 border border-white/5 rounded-2xl text-[10px] font-black tracking-tighter text-slate-500 hover:text-red-400 active:scale-95 transition-all"
+                        className="h-11 flex items-center justify-center bg-white/5 hover:bg-red-500/10 border border-white/5 rounded-xl text-[9px] font-black tracking-tighter text-slate-500 hover:text-red-400 active:scale-95 transition-all"
                     >
                         CLR
                     </button>
                     <button
                         onClick={() => handleNumberClick('0')}
-                        className="h-12 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl text-xl font-bold text-white active:scale-95 transition-all font-sans"
+                        className="h-11 bg-white/5 hover:bg-white/10 border border-white/5 rounded-xl text-lg font-bold text-white active:scale-95 transition-all font-sans"
                     >
                         0
                     </button>
                     <button
                         onClick={handleManualSubmit}
-                        className="h-12 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-2xl text-emerald-400 active:scale-95 transition-all"
+                        className="h-11 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 rounded-xl text-emerald-400 active:scale-95 transition-all"
                     >
                         <Check className="w-5 h-5" />
                     </button>
                 </div>
 
                 {error && (
-                    <div className="flex items-center justify-center gap-1.5 text-red-400 text-[11px] font-bold mb-6 animate-in fade-in slide-in-from-top-1">
-                        <AlertCircle className="w-3.5 h-3.5" /> Invalid authentication PIN
+                    <div className="flex items-center justify-center gap-1.5 text-red-400 text-[10px] font-bold mb-4 animate-in fade-in slide-in-from-top-1">
+                        <AlertCircle className="w-3 h-3" /> Invalid authentication PIN
                     </div>
                 )}
 
-                <div className="flex items-center justify-center gap-2 mt-2">
+                <div className="flex items-center justify-center gap-2 mt-1">
                     <div className="flex -space-x-1">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="w-4 h-4 rounded-full border border-[#0F172A] bg-slate-800 flex items-center justify-center overflow-hidden">
-                                < Shield className="w-2 h-2 text-emerald-500/50" />
+                            <div key={i} className="w-3.5 h-3.5 rounded-full border border-[#0F172A] bg-slate-800 flex items-center justify-center overflow-hidden">
+                                <Shield className="w-2 h-2 text-emerald-500/50" />
                             </div>
                         ))}
                     </div>
-                    <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">End-to-End Encrypted</span>
+                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-[0.2em]">End-to-End Encrypted</span>
                 </div>
             </div>
         </div>
