@@ -500,18 +500,6 @@ export default function ReportsPage() {
                     router.push('/dashboard/vault/secure');
                 }}
             />
-
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-                
-                body {
-                    font-family: 'Plus Jakarta Sans', sans-serif;
-                }
-                
-                .font-playfair {
-                    font-family: 'Playfair Display', serif;
-                }
-            `}</style>
         </div>
     );
 }

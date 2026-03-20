@@ -430,23 +430,6 @@ export default function SecureVaultPage() {
           </div>
         </div>
       )}
-
-      <style jsx global>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        
-        body {
-          font-family: 'Plus Jakarta Sans', sans-serif;
-          background-color: #FDFDFF;
-        }
-        
-        .font-playfair {
-          font-family: 'Playfair Display', serif;
-        }
-
-        .ease-out-expo {
-          transition-timing-function: cubic-bezier(0.19, 1, 0.22, 1);
-        }
-      `}</style>
     </div>
   );
 }
