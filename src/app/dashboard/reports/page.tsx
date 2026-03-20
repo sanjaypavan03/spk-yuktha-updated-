@@ -195,7 +195,7 @@ export default function ReportsPage() {
     }
 
     return (
-        <div className="space-y-8 pb-24 sm:pb-8 font-sans bg-[#F8FAFC] min-h-screen p-4 sm:p-8 lg:p-12 max-w-5xl mx-auto">
+        <div className="space-y-8 pb-24 sm:pb-8 font-sans bg-[#F8FAFC] min-h-screen p-4 pt-1 sm:px-8 sm:pb-8 sm:pt-2 lg:px-12 lg:pt-2 max-w-5xl mx-auto">
             
             {/* Header Section */}
             <div className="bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[24px] sm:rounded-[32px] p-5 sm:p-12 text-white shadow-2xl relative overflow-hidden">

@@ -63,8 +63,7 @@ export default function DashboardLayout({
                     <UserSidebar />
                     <SidebarInset>
                         <main className={cn(
-                            "min-h-screen",
-                        isDashboard ? "p-4 pt-1 sm:px-8 lg:px-12 sm:pt-2 lg:pt-2 pb-8" : "p-4 sm:p-8 lg:p-12"
+                            "min-h-screen p-4 pt-1 sm:px-8 lg:px-12 sm:pt-2 lg:pt-2 pb-8"
                     )}>
                             {children}
                         </main>
