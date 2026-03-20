@@ -55,27 +55,27 @@ export default function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
-      <ReportProvider>
-          <NotificationProvider>
-            <MedicineProvider>
-                <EmergencyInfoProvider>
-                <UserSidebar />
-                <SidebarInset>
-                    <main className={cn(
-                        "min-h-screen",
-                        isDashboard ? "p-4 pt-0 sm:p-8 lg:p-12" : "p-4 sm:p-8 lg:p-12"
+    <ReportProvider>
+        <NotificationProvider>
+        <MedicineProvider>
+            <EmergencyInfoProvider>
+                <SidebarProvider>
+                    <UserSidebar />
+                    <SidebarInset>
+                        <main className={cn(
+                            "min-h-screen",
+                        isDashboard ? "p-4 pt-1 sm:px-8 lg:px-12 sm:pt-2 lg:pt-2 pb-8" : "p-4 sm:p-8 lg:p-12"
                     )}>
-                        {children}
-                    </main>
-                </SidebarInset>
+                            {children}
+                        </main>
+                    </SidebarInset>
+                    <EmergencyInfoModal />
+                </SidebarProvider>
                 <BottomNavbar />
-                <EmergencyInfoModal />
-                </EmergencyInfoProvider>
-            </MedicineProvider>
-        </NotificationProvider>
-      </ReportProvider>
-    </SidebarProvider>
+            </EmergencyInfoProvider>
+        </MedicineProvider>
+    </NotificationProvider>
+    </ReportProvider>
   );
 }
 

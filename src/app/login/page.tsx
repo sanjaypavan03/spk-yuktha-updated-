@@ -112,7 +112,7 @@ export default function LoginPage() {
 
         <div className="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-8 md:hidden"></div>
 
-        <h2 className="text-2xl font-bold text-slate-800 mb-6 font-playfair">
+        <h2 className="text-2xl font-bold text-slate-900 mb-6 font-playfair">
           {isLoginView ? 'Welcome back' : 'Create account'}
         </h2>
 
@@ -125,38 +125,38 @@ export default function LoginPage() {
 
           {!isLoginView && (
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1 ml-1">Full Name</label>
+              <label className="block text-sm font-bold text-slate-700 mb-1 ml-1">Full Name</label>
               <input
                 type="text"
                 required={!isLoginView}
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] focus:border-transparent transition-all text-slate-900 placeholder:text-slate-400"
                 placeholder="John Doe"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1 ml-1">Email Address</label>
+            <label className="block text-sm font-bold text-slate-700 mb-1 ml-1">Email Address</label>
             <input
               type="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] focus:border-transparent transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] focus:border-transparent transition-all text-slate-900 placeholder:text-slate-400"
               placeholder="you@email.com"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1 ml-1">Password</label>
+            <label className="block text-sm font-bold text-slate-700 mb-1 ml-1">Password</label>
             <input
               type="password"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] focus:border-transparent transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] focus:border-transparent transition-all text-slate-900 placeholder:text-slate-400"
               placeholder="••••••••"
             />
           </div>
@@ -164,22 +164,22 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-6 py-3.5 bg-gradient-to-r from-[#02B69A] to-[#00C9A7] text-white rounded-2xl font-semibold shadow-[0_6px_20px_rgba(2,182,154,0.4)] hover:shadow-[0_8px_25px_rgba(2,182,154,0.5)] transform hover:-translate-y-0.5 transition-all disabled:opacity-70 disabled:transform-none"
+            className="w-full mt-6 py-4 bg-gradient-to-r from-[#02B69A] to-[#018A75] text-white rounded-2xl font-bold shadow-[0_8px_25px_rgba(2,182,154,0.4)] hover:shadow-[0_10px_30px_rgba(2,182,154,0.5)] active:scale-[0.98] transition-all disabled:opacity-70 disabled:transform-none"
           >
-            {loading ? 'Please wait...' : (isLoginView ? 'Sign In' : 'Create Account')}
+            {loading ? 'Please wait...' : (isLoginView ? 'Sign Into Yuktha' : 'Create My Account')}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center pb-2">
           <button
             type="button"
             onClick={() => {
               setIsLoginView(!isLoginView);
               setError(null);
             }}
-            className="text-sm text-slate-500 hover:text-[#02B69A] transition-colors font-medium"
+            className="text-sm text-slate-600 hover:text-[#02B69A] transition-colors font-bold underline decoration-slate-200 underline-offset-4"
           >
-            {isLoginView ? "Don't have an account? Sign up" : "Already have an account? Sign in"}
+            {isLoginView ? "Don't have an account? Create one" : "Already have an account? Sign in"}
           </button>
         </div>
       </div>

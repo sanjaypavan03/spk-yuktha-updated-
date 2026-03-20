@@ -30,49 +30,45 @@ export function BottomNavbar() {
             {/* Backdrop for speed dial */}
             {isDialOpen && (
                 <div
-                    className="fixed inset-0 bg-black/50 z-40 sm:hidden transition-opacity"
+                    className="fixed inset-0 bg-black/40 backdrop-blur-md z-40 sm:hidden animate-in fade-in duration-300"
                     onClick={() => setIsDialOpen(false)}
                 />
             )}
 
-            <div className="sm:hidden fixed bottom-0 left-0 z-50 w-full h-20 bg-white border-t border-slate-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe">
-                <div className="flex justify-around items-center h-full px-2">
+            <div className="md:hidden fixed bottom-0 left-0 z-50 w-full max-w-[100vw] h-[76px] bg-white/95 backdrop-blur-lg border-t border-slate-100 shadow-[0_-8px_30px_rgba(0,0,0,0.04)] pb-safe">
+                <div className="flex justify-between items-center h-full px-4 relative max-w-full">
                     {navItems.map((item, idx) => {
                         if (item.type === 'speed-dial') {
                             return (
-                                <div key="speed-dial" className="relative flex-shrink-0 flex items-center justify-center">
-                                    {/* Fan-out actions */}
+                                <div key="speed-dial" className="relative flex-shrink-0 flex items-center justify-center -translate-y-4">
+                                    {/* Floating Menu FAB Actions */}
                                     <div className={cn(
-                                        "absolute bottom-20 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 py-2 transition-all duration-300 origin-bottom",
-                                        isDialOpen ? "scale-100 opacity-100 translate-y-0" : "scale-0 opacity-0 translate-y-10 pointer-events-none"
+                                        "absolute bottom-24 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3.5 py-2 transition-all duration-500 ease-out-expo origin-bottom",
+                                        isDialOpen ? "scale-100 opacity-100 translate-y-0" : "scale-0 opacity-0 translate-y-12 pointer-events-none"
                                     )}>
-                                        <button onClick={() => handleAction('/dashboard/add-prescription')} className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
-                                            <span className="font-semibold text-sm text-slate-700">Add Medicine</span>
-                                            <div className="bg-blue-100 text-blue-600 p-1.5 rounded-full"><Pill className="w-4 h-4" /></div>
+                                        <button onClick={() => handleAction('/dashboard/add-prescription')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
+                                            <span className="font-bold text-[14px] text-slate-800 tracking-tight">Add Medicine</span>
+                                            <div className="bg-emerald-50 text-emerald-600 p-2 rounded-[12px]"><Pill className="w-4 h-4" strokeWidth={2.5} /></div>
                                         </button>
-                                        <button onClick={() => handleAction('/dashboard/reports')} className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
-                                            <span className="font-semibold text-sm text-slate-700">Analyse Report</span>
-                                            <div className="bg-purple-100 text-purple-600 p-1.5 rounded-full"><FileText className="w-4 h-4" /></div>
+                                        <button onClick={() => handleAction('/dashboard/reports')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
+                                            <span className="font-bold text-[14px] text-slate-800 tracking-tight">Analyse Report</span>
+                                            <div className="bg-indigo-50 text-indigo-600 p-2 rounded-[12px]"><FileText className="w-4 h-4" strokeWidth={2.5} /></div>
                                         </button>
-                                        <button onClick={() => handleAction('/dashboard/appointments')} className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
-                                            <span className="font-semibold text-sm text-slate-700">Book Appointment</span>
-                                            <div className="bg-[#02B69A]/20 text-[#018A75] p-1.5 rounded-full"><Calendar className="w-4 h-4" /></div>
-                                        </button>
-                                        <button onClick={() => handleAction('/dashboard/emergency-qr')} className="flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-lg border border-slate-100 whitespace-nowrap active:scale-95 transition-transform">
-                                            <span className="font-semibold text-sm text-slate-700 font-bold text-red-600">Emergency QR</span>
-                                            <div className="bg-red-100 text-red-600 p-1.5 rounded-full"><QrCode className="w-4 h-4" /></div>
+                                        <button onClick={() => handleAction('/dashboard/emergency-qr')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-red-50 active:scale-95 transition-all">
+                                            <span className="font-bold text-[14px] text-red-600 tracking-tight">Emergency Hub</span>
+                                            <div className="bg-red-50 text-red-600 p-2 rounded-[12px]"><QrCode className="w-4 h-4" strokeWidth={2.5} /></div>
                                         </button>
                                     </div>
 
-                                    {/* Main Dial Button */}
+                                    {/* Main Floating "+" Button */}
                                     <button
                                         onClick={toggleDial}
                                         className={cn(
-                                            "flex items-center justify-center h-14 w-14 bg-gradient-to-tr from-[#02B69A] to-[#00C9A7] text-white rounded-full shadow-[0_6px_16px_rgba(2,182,154,0.4)] transform transition-transform duration-300 -translate-y-6 border-4 border-white",
-                                            isDialOpen && "rotate-45 shadow-none bg-gradient-to-tr from-slate-400 to-slate-500"
+                                            "flex items-center justify-center h-16 w-16 bg-gradient-to-tr from-[#10B981] to-[#059669] text-white rounded-full shadow-[0_10px_30px_rgba(16,185,129,0.3)] transform transition-all duration-500 ease-out-expo border-4 border-white",
+                                            isDialOpen ? "rotate-45 scale-110 shadow-none ring-4 ring-emerald-500/10" : "hover:scale-105"
                                         )}
                                     >
-                                        <Plus className="h-6 w-6" strokeWidth={3} />
+                                        <Plus className="h-8 w-8" strokeWidth={3.5} />
                                     </button>
                                 </div>
                             )
@@ -81,11 +77,16 @@ export function BottomNavbar() {
                         const isActive = pathname === item.href;
                         return (
                             <Link key={item.label} href={item.href!} className={cn(
-                                "flex flex-col items-center justify-center w-16 h-12 gap-1 rounded-xl transition-colors",
-                                isActive ? "text-[#02B69A]" : "text-slate-400 hover:text-slate-600"
+                                "flex flex-col items-center justify-center w-12 h-12 gap-1 rounded-xl transition-all active:scale-90",
+                                isActive ? "text-emerald-600" : "text-slate-400 hover:text-slate-600"
                             )}>
-                                {item.icon && <item.icon className={cn("w-6 h-6", isActive && "stroke-[2.5px]")} />}
-                                <span className={cn("text-[10px] font-medium tracking-wide", isActive && "font-bold")}>{item.label}</span>
+                                {item.icon && <item.icon className={cn("w-6 h-6", isActive ? "stroke-[2.5px]" : "stroke-[2px]")} />}
+                                <span className={cn(
+                                    "text-[10px] font-bold tracking-tight transition-all duration-300",
+                                    isActive ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-1"
+                                )}>
+                                    {item.label}
+                                </span>
                             </Link>
                         )
                     })}

@@ -198,8 +198,8 @@ export default function ReportsPage() {
         <div className="space-y-8 pb-24 sm:pb-8 font-sans bg-[#F8FAFC] min-h-screen p-4 sm:p-8 lg:p-12 max-w-5xl mx-auto">
             
             {/* Header Section */}
-            <div className="bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[24px] sm:rounded-[32px] p-6 sm:p-12 text-white shadow-2xl relative overflow-hidden">
-                <div className="relative max-w-md group w-full">
+            <div className="bg-gradient-to-br from-slate-900 to-indigo-900 rounded-[24px] sm:rounded-[32px] p-5 sm:p-12 text-white shadow-2xl relative overflow-hidden">
+                <div className="relative max-w-full sm:max-w-md group w-full">
                     <div className="flex items-center gap-2 mb-3 sm:mb-4 opacity-80">
                         <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-300" />
                         <span className="font-bold tracking-widest text-[9px] sm:text-[10px] uppercase">Yuktha AI Health Intelligence</span>
@@ -246,12 +246,12 @@ export default function ReportsPage() {
                     </button>
                 </div>
 
-                <div className="p-6 sm:p-10">
+                <div className="p-5 sm:p-10">
                     {activeTab === 'upload' ? (
                         /* Upload Form Section */
                         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="col-span-2 space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Title</label>
                                     <div className="relative">
                                         <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
@@ -271,12 +271,12 @@ export default function ReportsPage() {
                                         <select 
                                             value={reportType}
                                             onChange={(e) => setReportType(e.target.value)}
-                                            className="w-full pl-11 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer"
+                                            className="w-full pl-10 pr-8 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer text-xs sm:text-sm"
                                         >
-                                            <option value="">Auto-Detect (AI)</option>
+                                            <option value="">Auto (AI)</option>
                                             {reportTypes.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
                                         </select>
-                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
@@ -287,11 +287,11 @@ export default function ReportsPage() {
                                             type="date" 
                                             value={reportDate}
                                             onChange={(e) => setReportDate(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
+                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
+                                <div className="col-span-2 space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Hospital / Clinic</label>
                                     <div className="relative">
                                         <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
@@ -325,7 +325,7 @@ export default function ReportsPage() {
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Select Report File (PDF/Image)</label>
                                 <div className={cn(
-                                    "border-2 border-dashed rounded-[32px] p-8 text-center transition-all cursor-pointer group hover:bg-indigo-50/30",
+                                    "border-2 border-dashed rounded-[32px] p-6 sm:p-8 text-center transition-all cursor-pointer group hover:bg-indigo-50/30 w-full mx-auto",
                                     file ? "border-emerald-200 bg-emerald-50/30" : "border-slate-100"
                                 )}>
                                     <input 
