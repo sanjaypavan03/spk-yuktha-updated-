@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { SecretVaultModal } from "@/components/dashboard/secret-vault-modal";
 import { cn } from "@/lib/utils";
+import { PremiumSelect } from '@/components/ui/premium-select';
 
 const reportTypes = [
   { id: 'blood', label: 'Blood Test' },
@@ -68,7 +69,6 @@ export default function ReportsPage() {
     const [profileLink, setProfileLink] = useState('Myself');
     const [file, setFile] = useState<File | null>(null);
     const [rawText, setRawText] = useState('');
-    const [isLangOpen, setIsLangOpen] = useState(false);
 
     // Vault States
     const [vaultReports, setVaultReports] = useState<any[]>([]);
@@ -271,63 +271,28 @@ export default function ReportsPage() {
                                             placeholder="e.g., Annual Lab Checkup"
                                             value={reportTitle}
                                             onChange={(e) => setReportTitle(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
+                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2 relative">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">AI Analysis Language</label>
-                                    <div className="relative">
-                                        <div 
-                                            onClick={() => setIsLangOpen(!isLangOpen)}
-                                            className="w-full pl-11 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer flex items-center justify-between group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Sparkles className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                                                <span className="text-sm">{selectedLanguage}</span>
-                                            </div>
-                                            <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-300", isLangOpen && "rotate-180")} />
-                                        </div>
-
-                                        {isLangOpen && (
-                                            <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-2">
-                                                <div className="max-h-60 overflow-y-auto scrollbar-hide">
-                                                    {languages.map((lang) => (
-                                                        <div 
-                                                            key={lang}
-                                                            onClick={() => {
-                                                                setSelectedLanguage(lang);
-                                                                setIsLangOpen(false);
-                                                            }}
-                                                            className={cn(
-                                                                "px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer flex items-center justify-between",
-                                                                selectedLanguage === lang ? "bg-indigo-50 text-indigo-600" : "text-slate-600 hover:bg-slate-50 hover:text-indigo-500"
-                                                            )}
-                                                        >
-                                                            {lang}
-                                                            {selectedLanguage === lang && <CheckCircle2 className="w-4 h-4" />}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Type</label>
-                                    <div className="relative">
-                                        <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
-                                        <select 
-                                            value={reportType}
-                                            onChange={(e) => setReportType(e.target.value)}
-                                            className="w-full pl-10 pr-8 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer text-xs sm:text-sm"
-                                        >
-                                            <option value="">Auto (AI)</option>
-                                            {reportTypes.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
+                                <PremiumSelect 
+                                    label="AI Analysis Language"
+                                    value={selectedLanguage}
+                                    onChange={setSelectedLanguage}
+                                    options={languages.map(l => ({ value: l, label: l }))}
+                                    icon={Sparkles}
+                                    searchable={true}
+                                />
+                                <PremiumSelect
+                                    label="Report Type"
+                                    value={reportType}
+                                    onChange={setReportType}
+                                    options={[
+                                        { value: "", label: "Auto (AI)" },
+                                        ...reportTypes.map(t => ({ value: t.id, label: t.label }))
+                                    ]}
+                                    icon={Activity}
+                                />
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Date</label>
                                     <div className="relative">
@@ -336,7 +301,7 @@ export default function ReportsPage() {
                                             type="date" 
                                             value={reportDate}
                                             onChange={(e) => setReportDate(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
+                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
                                         />
                                     </div>
                                 </div>
@@ -349,25 +314,20 @@ export default function ReportsPage() {
                                             placeholder="e.g., City Medical"
                                             value={hospitalName}
                                             onChange={(e) => setHospitalName(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
+                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Link to Profile</label>
-                                    <div className="relative">
-                                        <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
-                                        <select 
-                                            value={profileLink}
-                                            onChange={(e) => setProfileLink(e.target.value)}
-                                            className="w-full pl-11 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer"
-                                        >
-                                            <option value="Myself">Myself</option>
-                                            <option value="Family Member">Family Member</option>
-                                        </select>
-                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
+                                <PremiumSelect
+                                    label="Link to Profile"
+                                    value={profileLink}
+                                    onChange={setProfileLink}
+                                    options={[
+                                        { value: "Myself", label: "Myself" },
+                                        { value: "Family Member", label: "Family Member" }
+                                    ]}
+                                    icon={UserIcon}
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -436,63 +396,28 @@ export default function ReportsPage() {
                                             placeholder="e.g., Clinical Summary"
                                             value={reportTitle}
                                             onChange={(e) => setReportTitle(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
+                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">AI Analysis Language</label>
-                                    <div className="relative">
-                                        <div 
-                                            onClick={() => setIsLangOpen(!isLangOpen)}
-                                            className="w-full pl-11 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer flex items-center justify-between group"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Sparkles className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
-                                                <span className="text-sm">{selectedLanguage}</span>
-                                            </div>
-                                            <ChevronDown className={cn("w-4 h-4 text-slate-400 transition-transform duration-300", isLangOpen && "rotate-180")} />
-                                        </div>
-
-                                        {isLangOpen && (
-                                            <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-[24px] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 p-2">
-                                                <div className="max-h-60 overflow-y-auto custom-scrollbar">
-                                                    {languages.map((lang) => (
-                                                        <div 
-                                                            key={lang}
-                                                            onClick={() => {
-                                                                setSelectedLanguage(lang);
-                                                                setIsLangOpen(false);
-                                                            }}
-                                                            className={cn(
-                                                                "px-4 py-3 rounded-xl text-sm font-medium transition-all cursor-pointer flex items-center justify-between",
-                                                                selectedLanguage === lang ? "bg-indigo-50 text-indigo-600" : "text-slate-600 hover:bg-slate-50 hover:text-indigo-500"
-                                                            )}
-                                                        >
-                                                            {lang}
-                                                            {selectedLanguage === lang && <CheckCircle2 className="w-4 h-4" />}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Type</label>
-                                    <div className="relative">
-                                        <Activity className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
-                                        <select 
-                                            value={reportType}
-                                            onChange={(e) => setReportType(e.target.value)}
-                                            className="w-full pl-10 pr-8 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer text-xs sm:text-sm"
-                                        >
-                                            <option value="">Auto (AI)</option>
-                                            {reportTypes.map(t => <option key={t.id} value={t.id}>{t.label}</option>)}
-                                        </select>
-                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
+                                <PremiumSelect 
+                                    label="AI Analysis Language"
+                                    value={selectedLanguage}
+                                    onChange={setSelectedLanguage}
+                                    options={languages.map(l => ({ value: l, label: l }))}
+                                    icon={Sparkles}
+                                    searchable={true}
+                                />
+                                <PremiumSelect
+                                    label="Report Type"
+                                    value={reportType}
+                                    onChange={setReportType}
+                                    options={[
+                                        { value: "", label: "Auto (AI)" },
+                                        ...reportTypes.map(t => ({ value: t.id, label: t.label }))
+                                    ]}
+                                    icon={Activity}
+                                />
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Date</label>
                                     <div className="relative">
@@ -501,7 +426,7 @@ export default function ReportsPage() {
                                             type="date" 
                                             value={reportDate}
                                             onChange={(e) => setReportDate(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
+                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
                                         />
                                     </div>
                                 </div>
@@ -514,25 +439,20 @@ export default function ReportsPage() {
                                             placeholder="e.g., City Medical"
                                             value={hospitalName}
                                             onChange={(e) => setHospitalName(e.target.value)}
-                                            className="w-full pl-11 pr-4 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
+                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium"
                                         />
                                     </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Link to Profile</label>
-                                    <div className="relative">
-                                        <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 pointer-events-none" />
-                                        <select 
-                                            value={profileLink}
-                                            onChange={(e) => setProfileLink(e.target.value)}
-                                            className="w-full pl-11 pr-10 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 appearance-none focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium cursor-pointer"
-                                        >
-                                            <option value="Myself">Myself</option>
-                                            <option value="Family Member">Family Member</option>
-                                        </select>
-                                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                                    </div>
-                                </div>
+                                <PremiumSelect
+                                    label="Link to Profile"
+                                    value={profileLink}
+                                    onChange={setProfileLink}
+                                    options={[
+                                        { value: "Myself", label: "Myself" },
+                                        { value: "Family Member", label: "Family Member" }
+                                    ]}
+                                    icon={UserIcon}
+                                />
                              </div>
 
                              <div className="space-y-2">

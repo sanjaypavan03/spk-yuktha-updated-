@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { mockPatients } from "@/lib/data";
+import { PremiumSelect } from "@/components/ui/premium-select";
+import { User } from "lucide-react";
 
 export default function UploadPrescriptionPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -64,17 +66,14 @@ export default function UploadPrescriptionPage() {
         </CardHeader>
         <CardContent className="space-y-6">
             <div className="space-y-2">
-                <Label htmlFor="patient-select">Select Patient</Label>
-                <Select onValueChange={setPatientId} value={patientId}>
-                    <SelectTrigger id="patient-select">
-                        <SelectValue placeholder="Select a patient..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {mockPatients.map(p => (
-                            <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <PremiumSelect
+                    label="Select Patient"
+                    value={patientId}
+                    onChange={setPatientId}
+                    options={mockPatients.map(p => ({ value: p.id, label: p.name }))}
+                    icon={User}
+                    searchable={true}
+                />
             </div>
             <div className="space-y-2">
                 <Label htmlFor="prescription-file">Prescription File</Label>

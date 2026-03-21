@@ -1,6 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { cn } from "@/lib/utils";
+
+export function MultilingualBrand() {
+    const [activeBrandIndex, setActiveBrandIndex] = useState(0);
+    const brandTransliterations = [
+        "yuktha", "युक्त", "যুক্ত", "যুক্ত", "యుక్త", "யுக்தா", "યુક્ત", "یکتھا",
+        "ಯುಕ್ತ", "ଯୁକ୍ତ", "യുಕ್ತ", "ਯੁਕਤ", "যুক্ত", "युक्त", "ᱭᱩᱠᱛᱷᱟ", "یکতھا",
+        "युक्त", "يوڪٿا", "युक्त", "युक्त", "য়ুক্তা", "युक्त", "युक्त"
+    ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveBrandIndex(prev => (prev + 1) % brandTransliterations.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="h-24 flex items-center justify-center relative w-full overflow-hidden">
+            {brandTransliterations.map((brand, idx) => (
+                <h1
+                    key={idx}
+                    className={cn(
+                        "absolute inset-0 flex items-end justify-center text-4xl font-playfair italic font-black text-[#02B69A] tracking-tighter pb-4 transition-all duration-700 ease-in-out",
+                        idx === activeBrandIndex ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                    )}
+                >
+                    <span className="flex items-end">
+                        {brand}
+                        <span className="w-[7px] h-[7px] bg-[#00D4AA] rounded-full ml-1 mb-[2px]"></span>
+                    </span>
+                </h1>
+            ))}
+        </div>
+    );
+}
 
 export default function HospitalLogin() {
     const [email, setEmail] = useState('');
@@ -39,16 +75,14 @@ export default function HospitalLogin() {
     };
 
     return (
-        <div className="min-h-screen bg-black flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+        <div className="min-h-screen bg-black flex flex-col justify-center py-10 sm:px-6 lg:px-8 font-sans">
             <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-                <h1 className="text-4xl font-playfair italic font-black text-[#02B69A] tracking-tighter">
-                    yuktha<span className="inline-block w-[7px] h-[7px] bg-[#00D4AA] rounded-full ml-1 mb-[2px]"></span>
-                </h1>
-                <h2 className="mt-6 text-2xl font-bold text-white tracking-tight">
+                <MultilingualBrand />
+                <h2 className="mt-1 text-xl font-bold text-white tracking-tight">
                     Hospital Administrator
                 </h2>
-                <p className="mt-2 text-sm text-gray-400">
-                    Manage your doctors, view analytics, and process patient scans.
+                <p className="mt-1 text-sm text-gray-400">
+                    Always with you.
                 </p>
             </div>
 
@@ -100,7 +134,7 @@ export default function HospitalLogin() {
                                 className="w-full flex justify-center py-2.5 px-4 rounded-xl shadow-sm text-sm font-semibold text-white bg-gradient-to-r from-[#02B69A] to-[#00C9A7] hover:from-[#018A75] hover:to-[#02B69A] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#02B69A] focus:ring-offset-gray-900 disabled:opacity-50 transition-all duration-200"
                                 style={{ boxShadow: '0 6px 20px rgba(2,182,154,0.4)' }}
                             >
-                                {loading ? 'Authenticating...' : 'Access Hospital System'}
+                                {loading ? 'Authenticating...' : 'Sign In'}
                             </button>
                         </div>
                     </form>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { User, Activity, CheckCircle2, Search, FileText, ChevronDown, ActivitySquare, Heart, Scale } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PremiumSelect } from "@/components/ui/premium-select";
 
 export default function DoctorPatientsPage() {
     const { toast } = useToast();
@@ -112,7 +113,7 @@ export default function DoctorPatientsPage() {
                         <div key={i} className="animate-pulse bg-slate-900 rounded-2xl h-24 border border-slate-800"></div>
                     ))}
                 </div>
-            ) : filteredList.length === 0 ? (
+            ) : filteredPatients.length === 0 ? (
                 <div className="bg-slate-900/50 rounded-2xl p-12 text-center border border-slate-800 border-dashed">
                     <User className="w-12 h-12 text-slate-700 mx-auto mb-4" />
                     <h3 className="text-lg font-bold text-slate-300 font-playfair">No Patients Found</h3>
@@ -198,16 +199,19 @@ export default function DoctorPatientsPage() {
                                                     <label className="text-xs font-medium text-slate-400 mb-1.5 flex items-center gap-1.5">
                                                         <FileText className="w-3.5 h-3.5 text-slate-400" /> Condition Control
                                                     </label>
-                                                    <select
+                                                    <PremiumSelect
+                                                        label="Condition Control"
                                                         value={clinicalData.conditionControlLevel}
-                                                        onChange={e => setClinicalData({ ...clinicalData, conditionControlLevel: e.target.value })}
-                                                        className="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-300 focus:ring-1 focus:ring-[#02B69A] focus:border-[#02B69A] outline-none appearance-none"
-                                                    >
-                                                        <option>Stable</option>
-                                                        <option>Improving</option>
-                                                        <option>Deteriorating</option>
-                                                        <option>Critical</option>
-                                                    </select>
+                                                        onChange={val => setClinicalData({ ...clinicalData, conditionControlLevel: val })}
+                                                        options={[
+                                                            { value: 'Stable', label: 'Stable' },
+                                                            { value: 'Improving', label: 'Improving' },
+                                                            { value: 'Deteriorating', label: 'Deteriorating' },
+                                                            { value: 'Critical', label: 'Critical' },
+                                                        ]}
+                                                        icon={FileText}
+                                                        className="bg-slate-900 border-slate-800"
+                                                    />
                                                 </div>
                                             </div>
 

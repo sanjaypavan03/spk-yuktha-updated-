@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Calendar as CalendarIcon, Clock, Hospital, FileText, ChevronRight } from "lucide-react";
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { PremiumSelect } from '@/components/ui/premium-select';
 
 export default function AppointmentsPage() {
     const { user } = useAuth();
@@ -148,20 +149,14 @@ export default function AppointmentsPage() {
                         </div>
 
                         <form onSubmit={handleBook} className="p-6 -mt-4 bg-white rounded-t-2xl relative z-10 space-y-5">
-                            <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Select Hospital</label>
-                                <select
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] text-slate-700 appearance-none"
+                                <PremiumSelect
+                                    label="Select Hospital"
                                     value={selectedHospital}
-                                    onChange={(e) => setSelectedHospital(e.target.value)}
-                                    required
-                                >
-                                    <option value="" disabled>Choose a hospital...</option>
-                                    {hospitals.map(h => (
-                                        <option key={h._id} value={h._id}>{h.name}</option>
-                                    ))}
-                                </select>
-                            </div>
+                                    onChange={setSelectedHospital}
+                                    options={hospitals.map(h => ({ value: h._id, label: h.name }))}
+                                    icon={Hospital}
+                                    searchable={true}
+                                />
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Select Date</label>

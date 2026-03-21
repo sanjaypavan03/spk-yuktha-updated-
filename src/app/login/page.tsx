@@ -4,6 +4,42 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from "@/lib/utils";
+
+export function MultilingualBrand() {
+    const [activeBrandIndex, setActiveBrandIndex] = useState(0);
+    const brandTransliterations = [
+        "yuktha", "युक्त", "যুক্ত", "युक्त", "యుక్త", "யுக்தா", "યુક્ત", "یکتھا",
+        "ಯುಕ್ತ", "ଯୁକ୍ત", "യുಕ್ತ", "ਯੁਕਤ", "যুক্ত", "युक्त", "ᱭᱩᱠᱛᱷᱟ", "یکতھا",
+        "युक्त", "يوڪٿا", "युक्त", "युक्त", "য়ুক্তা", "युक्त", "युक्त"
+    ];
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setActiveBrandIndex(prev => (prev + 1) % brandTransliterations.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="h-24 flex items-center justify-center relative w-full overflow-hidden">
+            {brandTransliterations.map((brand, idx) => (
+                <h1
+                    key={idx}
+                    className={cn(
+                        "absolute inset-0 flex items-end justify-center text-5xl md:text-6xl font-playfair italic font-black text-[#02B69A] tracking-tighter pb-4 transition-all duration-700 ease-in-out",
+                        idx === activeBrandIndex ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                    )}
+                >
+                    <span className="flex items-end">
+                        {brand}
+                        <span className="w-[8px] h-[8px] md:w-[10px] md:h-[10px] bg-[#00D4AA] rounded-full ml-1 mb-[5px] md:mb-[8px]"></span>
+                    </span>
+                </h1>
+            ))}
+        </div>
+    );
+}
 
 export default function LoginPage() {
   const { login, signup, user } = useAuth();
@@ -37,7 +73,7 @@ export default function LoginPage() {
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveTextIndex(prev => (prev + 1) % rotatingTexts.length);
-    }, 3000);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
@@ -85,20 +121,21 @@ export default function LoginPage() {
 
   return (
     <main className="relative min-h-screen bg-[#0F2027] overflow-hidden flex flex-col font-sans">
-      {/* Top Branding Section */}
-      <div className="flex-1 flex flex-col justify-center items-center px-6 pb-20 mt-10">
-        <div className="text-center">
-          <h1 className="text-5xl md:text-6xl font-playfair italic font-black text-[#02B69A] tracking-tighter shadow-sm flex items-end justify-center">
-            yuktha<span className="inline-block w-[8px] h-[8px] md:w-[10px] md:h-[10px] bg-[#00D4AA] rounded-full ml-1 mb-[5px] md:mb-[8px]"></span>
-          </h1>
-        </div>
+      {/* Top Branding Section - Descender Fix */}
+      <div className="flex-1 flex flex-col justify-center items-center px-6 pb-8 pt-6">
+        <MultilingualBrand />
 
-        {/* Rotating Text */}
-        <div className="mt-8 h-10 relative w-full flex justify-center">
+        {/* Tagline - Refined gap closer to the 96px box */}
+        <p className="mt-1 text-lg md:text-xl font-medium text-slate-300 text-center">
+           Always with you.
+        </p>
+
+        {/* Rotating Text (Secondary) - Tight but legible */}
+        <div className="mt-1 h-8 relative w-full flex justify-center opacity-40">
           {rotatingTexts.map((text, idx) => (
             <p
               key={idx}
-              className={`absolute text-lg md:text-xl font-medium text-slate-300 transition-all duration-700 ease-in-out ${idx === activeTextIndex ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
+              className={`absolute text-sm font-medium text-slate-400 transition-all duration-700 ease-in-out whitespace-nowrap ${idx === activeTextIndex ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
                 }`}
             >
               {text}

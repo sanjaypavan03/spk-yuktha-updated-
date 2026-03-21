@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Plus, Trash2, Phone, Shield, X, UserPlus } from "lucide-react";
+import { Users, Plus, Trash2, Phone, Shield, X, UserPlus, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PremiumSelect } from "@/components/ui/premium-select";
 
 interface FamilyMember {
     id: string;
@@ -82,21 +83,23 @@ export default function FamilyPage() {
                                 <input type="text" value={newMember.name} onChange={e => setNewMember({ ...newMember, name: e.target.value })} placeholder="e.g. Ravi Kumar" className={inputClass} />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">Relation *</label>
-                                    <select value={newMember.relation} onChange={e => setNewMember({ ...newMember, relation: e.target.value })} className={inputClass}>
-                                        <option value="">Select...</option>
-                                        <option>Father</option>
-                                        <option>Mother</option>
-                                        <option>Spouse</option>
-                                        <option>Sibling</option>
-                                        <option>Son</option>
-                                        <option>Daughter</option>
-                                        <option>Guardian</option>
-                                        <option>Caregiver</option>
-                                        <option>Other</option>
-                                    </select>
-                                </div>
+                                    <PremiumSelect
+                                        label="Relation *"
+                                        value={newMember.relation}
+                                        onChange={val => setNewMember({ ...newMember, relation: val })}
+                                        options={[
+                                            { value: 'Father', label: 'Father' },
+                                            { value: 'Mother', label: 'Mother' },
+                                            { value: 'Spouse', label: 'Spouse' },
+                                            { value: 'Sibling', label: 'Sibling' },
+                                            { value: 'Son', label: 'Son' },
+                                            { value: 'Daughter', label: 'Daughter' },
+                                            { value: 'Guardian', label: 'Guardian' },
+                                            { value: 'Caregiver', label: 'Caregiver' },
+                                            { value: 'Other', label: 'Other' },
+                                        ]}
+                                        icon={Heart}
+                                    />
                                 <div>
                                     <label className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1 block">Phone</label>
                                     <input type="tel" value={newMember.phone} onChange={e => setNewMember({ ...newMember, phone: e.target.value })} placeholder="9876543210" className={inputClass} />
