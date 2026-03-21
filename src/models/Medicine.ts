@@ -9,7 +9,8 @@ export interface IMedicine extends Document {
   userId: Types.ObjectId; // Reference to User
   name: string;
   dosage: string; // e.g., "500mg"
-  time: string; // e.g., "8:00 AM" - time of day to take medicine
+  times: string[]; // e.g., ["8:00 AM", "8:00 PM"] - multiple times of day to take medicine
+  time?: string; // Backward compatibility
   frequency: string; // e.g., "Twice daily"
   purpose: string; // e.g., "Blood pressure control"
   startDate: Date;
@@ -38,10 +39,14 @@ const medicineSchema = new Schema<IMedicine>(
       required: [true, 'Dosage is required'],
       trim: true,
     },
+    times: {
+      type: [String],
+      required: [true, 'At least one time is required'],
+      default: ['09:00 AM'],
+    },
+    // Backward compatibility for singular time
     time: {
       type: String,
-      required: [true, 'Time is required'],
-      trim: true,
     },
     frequency: {
       type: String,

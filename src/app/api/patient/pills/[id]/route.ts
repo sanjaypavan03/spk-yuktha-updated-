@@ -3,7 +3,7 @@ import dbConnect from '@/lib/db';
 import PillTracking from '@/models/PillTracking';
 import { getAuthenticatedUser } from '@/lib/auth';
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
         await dbConnect();
         const user = await getAuthenticatedUser(request);
@@ -11,11 +11,12 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { id } = await params;
         const body = await request.json();
-        const { taken } = body;
+        const { taken, skipped } = body;
 
         const pill = await PillTracking.findOne({
-            _id: params.id,
+            _id: id,
             patientId: user.userId // Security: Ensure pill belongs to user
         });
 
@@ -23,11 +24,22 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
             return NextResponse.json({ error: 'Pill entry not found' }, { status: 404 });
         }
 
-        pill.taken = taken;
-        if (taken) {
-            pill.takenAt = new Date();
-        } else {
-            pill.takenAt = undefined;
+        if (taken !== undefined) {
+            pill.taken = taken;
+            if (taken) {
+                pill.takenAt = new Date();
+                pill.skipped = false; // Cannot be taken and skipped
+            } else {
+                pill.takenAt = undefined;
+            }
+        }
+
+        if (skipped !== undefined) {
+            pill.skipped = skipped;
+            if (skipped) {
+                pill.taken = false; // Cannot be taken and skipped
+                pill.takenAt = undefined;
+            }
         }
 
         await pill.save();

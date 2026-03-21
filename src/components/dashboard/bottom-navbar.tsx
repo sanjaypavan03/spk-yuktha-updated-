@@ -50,6 +50,10 @@ export function BottomNavbar() {
                                             <span className="font-bold text-[14px] text-slate-800 tracking-tight">Add Medicine</span>
                                             <div className="bg-emerald-50 text-emerald-600 p-2 rounded-[12px]"><Pill className="w-4 h-4" strokeWidth={2.5} /></div>
                                         </button>
+                                        <button onClick={() => handleAction('/dashboard/appointments')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
+                                            <span className="font-bold text-[14px] text-slate-800 tracking-tight">Appointments</span>
+                                            <div className="bg-blue-50 text-blue-600 p-2 rounded-[12px]"><Calendar className="w-4 h-4" strokeWidth={2.5} /></div>
+                                        </button>
                                         <button onClick={() => handleAction('/dashboard/reports')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
                                             <span className="font-bold text-[14px] text-slate-800 tracking-tight">Analyse Report</span>
                                             <div className="bg-indigo-50 text-indigo-600 p-2 rounded-[12px]"><FileText className="w-4 h-4" strokeWidth={2.5} /></div>

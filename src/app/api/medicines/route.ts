@@ -9,12 +9,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import Medicine from '@/models/Medicine';
+import PillTracking from '@/models/PillTracking';
+import Prescription from '@/models/Prescription'; // Register model for reference
 import { getAuthenticatedUser } from '@/lib/auth';
 
 // GET - Fetch all medicines for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    await db;
+    await db();
 
     const authUser = await getAuthenticatedUser(request);
     if (!authUser) {
@@ -46,7 +48,7 @@ export async function GET(request: NextRequest) {
 // POST - Create new medicine
 export async function POST(request: NextRequest) {
   try {
-    await db;
+    await db();
 
     const authUser = await getAuthenticatedUser(request);
     if (!authUser) {
@@ -57,22 +59,25 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, dosage, time, frequency, purpose, instructions, startDate, endDate, taken } = body;
+    const { name, dosage, times, time, frequency, purpose, instructions, startDate, endDate, taken } = body;
+
+    // Support both 'times' array and single 'time' string for backward compatibility during migration
+    const finalTimes = Array.isArray(times) ? times : (time ? [time] : []);
 
     // Validation
-    if (!name || !dosage || !time) {
+    if (!name || !dosage || finalTimes.length === 0) {
       return NextResponse.json(
-        { error: 'Medicine name, dosage, and time are required' },
+        { error: 'Medicine name, dosage, and at least one time are required' },
         { status: 400 }
       );
     }
 
-    // Create medicine
+    // Create medicine template
     const medicine = await Medicine.create({
       userId: authUser.userId,
       name,
       dosage,
-      time,
+      times: finalTimes,
       frequency: frequency || 'Once daily',
       purpose,
       instructions,
@@ -80,6 +85,25 @@ export async function POST(request: NextRequest) {
       startDate: startDate ? new Date(startDate) : new Date(),
       endDate: endDate ? new Date(endDate) : undefined,
     });
+
+    // AUTO-GENERATE PillTracking entries for TODAY
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const trackingPromises = finalTimes.map(scheduledTime => 
+      PillTracking.create({
+        patientId: authUser.userId,
+        medicineName: name,
+        dosage,
+        scheduledTime,
+        date: today,
+        taken: false,
+        // Link to the medicine template
+        prescriptionId: medicine._id 
+      })
+    );
+
+    await Promise.all(trackingPromises);
 
     return NextResponse.json(
       {
@@ -89,10 +113,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create medicine error:', error);
     return NextResponse.json(
-      { error: 'Failed to create medicine' },
+      { error: error.message || 'Failed to create medicine' },
       { status: 500 }
     );
   }

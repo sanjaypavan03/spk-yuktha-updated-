@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
         const trackings = await PillTracking.find({
-            userId: authUser.userId,
+            patientId: authUser.userId,
             date: { $gte: thirtyDaysAgo }
         });
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
             });
         }
 
-        const takenCount = trackings.filter(t => t.status === 'taken').length;
+        const takenCount = trackings.filter(t => t.taken).length;
         const totalCount = trackings.length;
         const score = Math.round((takenCount / totalCount) * 100);
 
@@ -38,13 +38,13 @@ export async function GET(request: NextRequest) {
         sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
 
         const prevTrackings = await PillTracking.find({
-            userId: authUser.userId,
+            patientId: authUser.userId,
             date: { $gte: sixtyDaysAgo, $lt: thirtyDaysAgo }
         });
 
         let trend = 'stable';
         if (prevTrackings.length > 0) {
-            const prevTakenCount = prevTrackings.filter(t => t.status === 'taken').length;
+            const prevTakenCount = prevTrackings.filter(t => t.taken).length;
             const prevTotalCount = prevTrackings.length;
             const prevScore = Math.round((prevTakenCount / prevTotalCount) * 100);
 

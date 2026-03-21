@@ -142,13 +142,13 @@ export default function AppointmentsPage() {
                             Book Visit
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px] rounded-2xl p-0 overflow-hidden bg-white border-none">
-                        <div className="bg-[#02B69A] p-6 text-white pb-8 z-0 relative">
-                            <DialogTitle className="text-2xl font-playfair font-bold">Book Appointment</DialogTitle>
-                            <p className="text-emerald-50 text-sm mt-1">Schedule a visit at a Yuktha hospital.</p>
+                    <DialogContent className="w-[94%] sm:max-w-[400px] rounded-2xl p-0 overflow-hidden bg-white border-none shadow-2xl">
+                        <div className="bg-[#02B69A] p-3.5 text-white pb-3 z-0 relative">
+                            <DialogTitle className="text-base font-playfair font-bold">Book Appointment</DialogTitle>
+                            <p className="text-emerald-50 text-[10px] mt-0.5 opacity-80">Schedule a visit at a Yuktha hospital.</p>
                         </div>
 
-                        <form onSubmit={handleBook} className="p-6 -mt-4 bg-white rounded-t-2xl relative z-10 space-y-5">
+                        <form onSubmit={handleBook} className="p-3.5 -mt-3 bg-white rounded-t-xl relative z-10 space-y-2.5">
                                 <PremiumSelect
                                     label="Select Hospital"
                                     value={selectedHospital}
@@ -159,11 +159,11 @@ export default function AppointmentsPage() {
                                 />
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Select Date</label>
+                                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Select Date</label>
                                 <input
                                     type="date"
                                     min={new Date().toISOString().split('T')[0]} // Cannot book past
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] text-slate-700"
+                                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] text-slate-700 text-sm"
                                     value={selectedDate}
                                     onChange={(e) => setSelectedDate(e.target.value)}
                                     required
@@ -172,20 +172,20 @@ export default function AppointmentsPage() {
 
                             {selectedHospital && selectedDate && (
                                 <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-2 ml-1">Available Slots</label>
+                                    <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Available Slots</label>
                                     {slotsLoading ? (
                                         <p className="text-sm text-slate-500 italic ml-1">Finding slots...</p>
                                     ) : availableSlots.length === 0 ? (
                                         <p className="text-sm text-red-500 font-medium bg-red-50 p-3 rounded-lg border border-red-100">No slots available for this date.</p>
                                     ) : (
-                                        <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
+                                        <div className="grid grid-cols-4 gap-1.5 max-h-24 overflow-y-auto pr-1">
                                             {availableSlots.map(slot => (
                                                 <button
                                                     key={slot}
                                                     type="button"
                                                     disabled={slot === selectedSlot ? false : undefined} // Keep simple disabled not needed for toggle
                                                     onClick={() => setSelectedSlot(slot)}
-                                                    className={`py-2 text-sm rounded-lg border transition-colors font-medium ${selectedSlot === slot
+                                                    className={`py-1.5 text-[11px] rounded-lg border transition-colors font-semibold ${selectedSlot === slot
                                                             ? 'bg-[#02B69A] text-white border-[#02B69A] shadow-md'
                                                             : 'bg-white text-slate-600 border-slate-200 hover:border-[#02B69A] hover:bg-emerald-50'
                                                         }`}
@@ -199,9 +199,9 @@ export default function AppointmentsPage() {
                             )}
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Reason for Visit</label>
+                                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1 ml-1">Reason for Visit</label>
                                 <textarea
-                                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] text-slate-700 resize-none h-20"
+                                    className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#02B69A] text-[#111] text-xs resize-none h-12"
                                     placeholder="e.g. Regular checkup, fever, etc."
                                     value={reason}
                                     onChange={(e) => setReason(e.target.value)}
@@ -212,7 +212,7 @@ export default function AppointmentsPage() {
                             <Button
                                 type="submit"
                                 disabled={bookingLoading}
-                                className="w-full py-6 mt-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-base transition-colors"
+                                className="w-full py-3.5 mt-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors"
                             >
                                 {bookingLoading ? 'Confirming...' : 'Confirm Booking'}
                             </Button>

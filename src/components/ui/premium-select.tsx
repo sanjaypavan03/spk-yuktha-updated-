@@ -45,7 +45,7 @@ export function PremiumSelect({
 
     return (
         <div className={cn("space-y-2", className)} ref={containerRef}>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1 whitespace-nowrap">
                 {label}
             </label>
             <div className="relative">
@@ -53,16 +53,16 @@ export function PremiumSelect({
                     type="button"
                     onClick={() => setIsOpen(!isOpen)}
                     className={cn(
-                        "w-full flex items-center justify-between px-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 hover:border-indigo-100 transition-all font-medium group",
+                        "w-full flex items-center justify-between pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 hover:border-indigo-100 transition-all font-medium group text-sm",
                         isOpen && "ring-4 ring-indigo-500/5 border-indigo-100 shadow-sm"
                     )}
                 >
-                    <div className="flex items-center gap-3 overflow-hidden">
+                    <div className="flex items-center gap-3 overflow-hidden absolute left-4 top-1/2 -translate-y-1/2">
                         {Icon && <Icon className="w-4 h-4 text-slate-300 group-hover:text-indigo-500 transition-colors shrink-0" />}
-                        <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate whitespace-nowrap">
-                            {selectedOption ? selectedOption.label : "Select..."}
-                        </span>
                     </div>
+                    <span className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate whitespace-nowrap">
+                        {selectedOption ? selectedOption.label : "Select..."}
+                    </span>
                     <ChevronDown 
                         className={cn(
                             "w-4 h-4 text-slate-400 transition-transform duration-300 group-hover:text-indigo-500 shrink-0",

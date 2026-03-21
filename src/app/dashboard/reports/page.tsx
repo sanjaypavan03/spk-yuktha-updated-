@@ -276,7 +276,7 @@ export default function ReportsPage() {
                                     </div>
                                 </div>
                                 <PremiumSelect 
-                                    label="AI Analysis Language"
+                                    label="Analysis Language"
                                     value={selectedLanguage}
                                     onChange={setSelectedLanguage}
                                     options={languages.map(l => ({ value: l, label: l }))}
@@ -401,7 +401,7 @@ export default function ReportsPage() {
                                     </div>
                                 </div>
                                 <PremiumSelect 
-                                    label="AI Analysis Language"
+                                    label="Analysis Language"
                                     value={selectedLanguage}
                                     onChange={setSelectedLanguage}
                                     options={languages.map(l => ({ value: l, label: l }))}

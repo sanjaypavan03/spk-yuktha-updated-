@@ -9,6 +9,7 @@ export interface IPillTracking extends Document {
     date: Date; // e.g. 2026-01-28T00:00:00.000Z (Normalized to midnight)
     taken: boolean;
     takenAt?: Date;
+    skipped?: boolean;
 }
 
 const pillTrackingSchema = new Schema<IPillTracking>(
@@ -21,6 +22,7 @@ const pillTrackingSchema = new Schema<IPillTracking>(
         date: { type: Date, required: true },
         taken: { type: Boolean, default: false },
         takenAt: { type: Date },
+        skipped: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

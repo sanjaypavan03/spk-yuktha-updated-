@@ -129,7 +129,7 @@ export default function AddPrescriptionPage() {
           body: JSON.stringify({
             name: med.name,
             dosage: med.dosage || 'Not specified',
-            time: '9:00 AM', // Default time, user can edit later
+            times: ['09:00 AM'], // Default time, user can edit in med-tracker
             frequency: 'Once daily', // Default
           }),
         })
