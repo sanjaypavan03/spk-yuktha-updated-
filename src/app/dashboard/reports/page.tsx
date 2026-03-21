@@ -218,7 +218,7 @@ export default function ReportsPage() {
                     </div>
                     <h1 className="text-3xl sm:text-5xl font-bold font-playfair tracking-tight mb-3 sm:mb-4 leading-tight">Analyze Lab Report</h1>
                     <p className="text-indigo-100/80 max-w-xl text-[13px] sm:text-base leading-relaxed font-medium">
-                        Upload your medical reports or paste raw results. Our advanced AI extracts parameters and secures them in your vault.
+                        Upload your medical reports or paste raw results. Our advanced AI analyzes and extracts parameters in 23+ Indian languages, securing them in your vault.
                     </p>
                     
                     <div className="mt-6 sm:mt-8 flex flex-row flex-wrap gap-2 sm:gap-4">
