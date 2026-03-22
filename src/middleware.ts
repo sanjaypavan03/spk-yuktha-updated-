@@ -11,6 +11,7 @@ export async function middleware(request: NextRequest) {
             pathname.startsWith('/api/auth/login') ||
             pathname.startsWith('/api/auth/signup') ||
             pathname.startsWith('/api/doctor/login') ||
+            pathname.startsWith('/api/receptionist/login') ||
             pathname.startsWith('/api/hospital/login') ||
             pathname.startsWith('/api/hospital/register') ||
             pathname.startsWith('/api/emergency/') ||
@@ -86,16 +87,16 @@ export async function middleware(request: NextRequest) {
     }
 
     // Receptionist Application Protection (Strict)
-    if (pathname.startsWith('/receptionist')) {
+    if (pathname.startsWith('/receptionist') && !pathname.startsWith('/receptionist/login')) {
         const token = extractToken(request);
 
         if (!token) {
-            return NextResponse.redirect(new URL('/hospital/login', request.url));
+            return NextResponse.redirect(new URL('/receptionist/login', request.url));
         }
 
         const payload = await verifyToken(token);
         if (!payload || payload.role !== 'receptionist') {
-            return NextResponse.redirect(new URL('/hospital/login', request.url));
+            return NextResponse.redirect(new URL('/receptionist/login', request.url));
         }
 
         return NextResponse.next();

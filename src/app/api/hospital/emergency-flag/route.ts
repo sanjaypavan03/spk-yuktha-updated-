@@ -8,8 +8,8 @@ export async function POST(request: NextRequest) {
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
-        if (!authUser || authUser.role !== 'hospital') {
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const body = await request.json();
@@ -40,8 +40,8 @@ export async function GET(request: NextRequest) {
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
-        if (!authUser || authUser.role !== 'hospital') {
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { searchParams } = new URL(request.url);
@@ -67,8 +67,8 @@ export async function PATCH(request: NextRequest) {
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
-        if (!authUser || authUser.role !== 'hospital') {
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const body = await request.json();

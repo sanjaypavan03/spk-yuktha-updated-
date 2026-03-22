@@ -10,6 +10,7 @@ function ReceptionistSidebar() {
     
     const menu = [
         { label: "Dashboard", href: "/receptionist/dashboard", icon: QrCode },
+        { label: "Register Patient", href: "/receptionist/register", icon: UserPlus },
         { label: "Upload Reports", href: "/receptionist/upload-report", icon: Upload },
         { label: "Scan QR", href: "/receptionist/scan", icon: QrCode },
         { label: "Appointments", href: "/receptionist/appointments", icon: Calendar },
@@ -18,8 +19,11 @@ function ReceptionistSidebar() {
     const handleLogout = async () => {
         try {
             await fetch('/api/auth/logout', { method: 'POST' });
+            // ## ✅ Verification
+            // - [x] Run `npx tsc --noEmit`
+            // - [x] Final walkthrough
         } finally {
-            window.location.href = '/hospital/login'; // Receptionists likely login via hospital portal or shared login
+            window.location.href = '/receptionist/login';
         }
     };
 
@@ -68,8 +72,9 @@ function ReceptionistBottomNav() {
 
     const menu = [
         { label: "Dashboard", href: "/receptionist/dashboard", icon: QrCode },
-        { label: "Scan QR", href: "/receptionist/scan", icon: QrCode },
-        { label: "Upload Reports", href: "/receptionist/upload-report", icon: Upload },
+        { label: "Reg", href: "/receptionist/register", icon: UserPlus },
+        { label: "Scan", href: "/receptionist/scan", icon: QrCode },
+        { label: "Upload", href: "/receptionist/upload-report", icon: Upload },
         { label: "Visits", href: "/receptionist/appointments", icon: Calendar },
     ];
 
@@ -95,32 +100,42 @@ function ReceptionistBottomNav() {
 
 export default function ReceptionistLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
+    const pathname = usePathname();
     const [loading, setLoading] = useState(true);
     const [receptionistUser, setReceptionistUser] = useState<any>(null);
 
     useEffect(() => {
+        if (pathname === '/receptionist/login') {
+            setLoading(false);
+            return;
+        }
+
         const checkAuth = async () => {
             try {
-                const res = await fetch('/api/auth/me'); 
+                const res = await fetch('/api/receptionist/me'); 
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.user && data.user.role === 'receptionist') {
+                    if (data.user) {
                         setReceptionistUser(data.user);
                     } else {
-                        router.push('/hospital/login');
+                        router.push('/receptionist/login');
                     }
                 } else {
-                    router.push('/hospital/login');
+                    router.push('/receptionist/login');
                 }
             } catch (e) {
-                router.push('/hospital/login');
+                router.push('/receptionist/login');
             } finally {
                 setLoading(false);
             }
         };
 
         checkAuth();
-    }, [router]);
+    }, [pathname, router]);
+
+    if (pathname === '/receptionist/login') {
+        return <>{children}</>;
+    }
 
     if (loading) {
         return <div className="min-h-screen bg-slate-950 flex justify-center items-center text-[#02B69A]">Authenticating...</div>;
@@ -138,7 +153,7 @@ export default function ReceptionistLayout({ children }: { children: React.React
                 </h1>
                 <button onClick={async () => {
                     await fetch('/api/auth/logout', { method: 'POST' });
-                    window.location.href = '/hospital/login';
+                    window.location.href = '/receptionist/login';
                 }} className="text-slate-500 p-2">
                     <LogOut className="w-5 h-5" />
                 </button>

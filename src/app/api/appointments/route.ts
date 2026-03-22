@@ -6,7 +6,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 export async function POST(request: NextRequest) {
     try {
         const authUser = await getAuthenticatedUser(request);
-        if (!authUser || (authUser.role !== 'user' && authUser.role !== 'hospital')) {
+        if (!authUser || (authUser.role !== 'user' && authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -14,9 +14,10 @@ export async function POST(request: NextRequest) {
         const body = await request.json();
         const { hospitalId, doctorId, date, timeSlot, reason, patientId } = body;
 
-        // Determine patientId: if hospital is booking, patientId must be provided. If user is booking, use their own ID.
-        const targetPatientId = authUser.role === 'hospital' ? patientId : authUser.userId;
-        const targetHospitalId = authUser.role === 'hospital' ? authUser.userId : hospitalId;
+        // Determine patientId: if hospital/receptionist is booking, patientId must be provided. If user is booking, use their own ID.
+        const isStaff = authUser.role === 'hospital' || authUser.role === 'receptionist';
+        const targetPatientId = isStaff ? patientId : authUser.userId;
+        const targetHospitalId = authUser.role === 'hospital' ? authUser.userId : (authUser.role === 'receptionist' ? authUser.hospitalId : hospitalId);
 
         if (!targetPatientId) {
             return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
@@ -74,8 +75,9 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ success: true, appointments });
         }
 
-        if (authUser.role === 'hospital') {
-            let query: any = { hospitalId: authUser.userId };
+        if (authUser.role === 'hospital' || authUser.role === 'receptionist') {
+            const hId = authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId;
+            let query: any = { hospitalId: hId };
             const doctorId = searchParams.get('doctorId');
             
             if (doctorId) {

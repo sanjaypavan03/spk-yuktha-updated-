@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
-        if (!authUser || authUser.role !== 'hospital') {
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const ipGate = planGate(authUser.hospitalPlan, 'ipAdmissions');
@@ -33,14 +33,15 @@ export async function POST(request: NextRequest) {
         }
 
         // Verify doctor belongs to this hospital
-        const doctor = await Doctor.findOne({ _id: doctorId, hospitalId: authUser.userId });
+        const targetHospitalId = authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId;
+        const doctor = await Doctor.findOne({ _id: doctorId, hospitalId: targetHospitalId });
         if (!doctor) {
             return NextResponse.json({ error: 'Doctor not found or does not belong to this hospital' }, { status: 400 });
         }
 
         const admission = await IPAdmission.create({
             patientId,
-            hospitalId: authUser.userId,
+            hospitalId: targetHospitalId,
             doctorId,
             ward,
             bedNumber,
@@ -62,8 +63,8 @@ export async function GET(request: NextRequest) {
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
-        if (!authUser || authUser.role !== 'hospital') {
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const { searchParams } = new URL(request.url);

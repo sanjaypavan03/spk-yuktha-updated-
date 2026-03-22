@@ -7,8 +7,8 @@ import { getAuthenticatedUser } from '@/lib/auth';
 export async function POST(request: NextRequest) {
     try {
         const authUser = await getAuthenticatedUser(request);
-        // Only hospital or doctor can view Tier 2 data
-        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'doctor')) {
+        // Only hospital, doctor, or receptionist can view Tier 2 data
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'doctor' && authUser.role !== 'receptionist')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 

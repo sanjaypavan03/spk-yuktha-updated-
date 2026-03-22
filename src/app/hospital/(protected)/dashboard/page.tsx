@@ -20,11 +20,13 @@ export default function HospitalDashboardPage() {
     const [patientData, setPatientData] = useState<any>(null);
 
     // Staff State
-    const [staff, setStaff] = useState<{ doctors: any[], pharmacies: any[] }>({ doctors: [], pharmacies: [] });
+    const [staff, setStaff] = useState<{ doctors: any[], pharmacies: any[], receptionists: any[] }>({ doctors: [], pharmacies: [], receptionists: [] });
     const [staffLoading, setStaffLoading] = useState(false);
     const [showAddDoctor, setShowAddDoctor] = useState(false);
     const [newDoctor, setNewDoctor] = useState({ name: '', email: '', specialty: '' });
-    const [passwordModal, setPasswordModal] = useState<{ open: boolean, doctorId: string, doctorName: string }>({ open: false, doctorId: '', doctorName: '' });
+    const [showAddReceptionist, setShowAddReceptionist] = useState(false);
+    const [newReceptionist, setNewReceptionist] = useState({ name: '', email: '', phone: '' });
+    const [passwordModal, setPasswordModal] = useState<{ open: boolean, id: string, name: string, type: 'doctor' | 'receptionist' }>({ open: false, id: '', name: '', type: 'doctor' });
     const [newPassword, setNewPassword] = useState('');
     const [settingPassword, setSettingPassword] = useState(false);
 
@@ -109,11 +111,27 @@ export default function HospitalDashboardPage() {
     const fetchStaff = async () => {
         setStaffLoading(true);
         try {
-            const res = await fetch('/api/hospital/staff');
-            if (res.ok) {
-                const data = await res.json();
-                setStaff({ doctors: data.doctors || [], pharmacies: data.pharmacies || [] });
+            const [staffRes, recepRes] = await Promise.all([
+                fetch('/api/hospital/staff'),
+                fetch('/api/hospital/staff/receptionist')
+            ]);
+            
+            let doctors = [];
+            let pharmacies = [];
+            let receptionists = [];
+
+            if (staffRes.ok) {
+                const data = await staffRes.json();
+                doctors = data.doctors || [];
+                pharmacies = data.pharmacies || [];
             }
+
+            if (recepRes.ok) {
+                const data = await recepRes.json();
+                receptionists = data.receptionists || [];
+            }
+
+            setStaff({ doctors, pharmacies, receptionists });
         } catch (e) {
             console.error(e);
         } finally {
@@ -146,6 +164,31 @@ export default function HospitalDashboardPage() {
         }
     };
 
+    const handleAddReceptionist = async () => {
+        if (!newReceptionist.name || !newReceptionist.email || !newReceptionist.phone) {
+            toast({ variant: 'destructive', description: 'Name, email, and phone are required.' });
+            return;
+        }
+        try {
+            const res = await fetch('/api/hospital/staff/receptionist', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newReceptionist)
+            });
+            if (res.ok) {
+                toast({ title: 'Receptionist Added', description: `${newReceptionist.name} has been added.` });
+                setNewReceptionist({ name: '', email: '', phone: '' });
+                setShowAddReceptionist(false);
+                fetchStaff();
+            } else {
+                const data = await res.json();
+                toast({ variant: 'destructive', description: data.error || 'Failed to add receptionist.' });
+            }
+        } catch (e) {
+            toast({ variant: 'destructive', description: 'Network error.' });
+        }
+    };
+
     const handleSetPassword = async () => {
         if (!newPassword || newPassword.length < 6) {
             toast({ variant: 'destructive', description: 'Password must be at least 6 characters.' });
@@ -153,14 +196,22 @@ export default function HospitalDashboardPage() {
         }
         setSettingPassword(true);
         try {
-            const res = await fetch('/api/admin/doctors/set-password', {
+            const url = passwordModal.type === 'doctor' 
+                ? '/api/admin/doctors/set-password' 
+                : '/api/admin/receptionists/set-password';
+            
+            const body = passwordModal.type === 'doctor'
+                ? { doctorId: passwordModal.id, password: newPassword }
+                : { receptionistId: passwordModal.id, password: newPassword };
+
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ doctorId: passwordModal.doctorId, password: newPassword })
+                body: JSON.stringify(body)
             });
             if (res.ok) {
-                toast({ title: 'Password Set', description: `Login password set for ${passwordModal.doctorName}.` });
-                setPasswordModal({ open: false, doctorId: '', doctorName: '' });
+                toast({ title: 'Password Set', description: `Login password set for ${passwordModal.name}.` });
+                setPasswordModal({ open: false, id: '', name: '', type: 'doctor' });
                 setNewPassword('');
             } else {
                 const data = await res.json();
@@ -880,10 +931,8 @@ export default function HospitalDashboardPage() {
                     {staffLoading ? (
                         <div className="space-y-3">{[1, 2].map(i => <div key={i} className="animate-pulse bg-slate-900 rounded-2xl h-20 border border-slate-800"></div>)}</div>
                     ) : staff.doctors.length === 0 ? (
-                        <div className="bg-slate-900/50 rounded-2xl p-12 text-center border border-dashed border-slate-800">
-                            <Users className="w-12 h-12 text-slate-700 mx-auto mb-4" />
-                            <h3 className="text-lg font-bold text-slate-400">No Doctors Yet</h3>
-                            <p className="text-slate-500 text-sm mt-2">Add doctors to your hospital to manage patient care.</p>
+                        <div className="bg-slate-900/50 rounded-2xl p-8 text-center border border-dashed border-slate-800">
+                            <p className="text-slate-500 text-sm">No doctors added yet.</p>
                         </div>
                     ) : (
                         <div className="grid gap-4 sm:grid-cols-2">
@@ -902,7 +951,65 @@ export default function HospitalDashboardPage() {
                                             size="sm"
                                             variant="outline"
                                             className="border-[#02B69A]/30 text-[#02B69A] hover:bg-[#02B69A]/10 gap-1.5 shrink-0"
-                                            onClick={() => setPasswordModal({ open: true, doctorId: doc._id, doctorName: doc.name })}
+                                            onClick={() => setPasswordModal({ open: true, id: doc._id, name: doc.name, type: 'doctor' })}
+                                        >
+                                            <Key className="w-3.5 h-3.5" /> Set Password
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="flex justify-between items-center pt-8 border-t border-slate-800">
+                        <h3 className="text-lg font-bold text-white font-playfair">Receptionists</h3>
+                        <Button onClick={() => setShowAddReceptionist(!showAddReceptionist)} className="bg-white hover:bg-slate-100 text-black font-bold h-10">
+                            <Plus className="w-4 h-4 mr-2" /> Add Receptionist
+                        </Button>
+                    </div>
+
+                    {/* Add Receptionist Form */}
+                    {showAddReceptionist && (
+                        <Card className="bg-slate-900 border-slate-800 animate-in slide-in-from-top-4 duration-300">
+                            <CardContent className="p-5 space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-bold text-white">New Receptionist</h4>
+                                    <Button size="icon" variant="ghost" onClick={() => setShowAddReceptionist(false)}><X className="w-4 h-4 text-slate-400" /></Button>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                    <input type="text" placeholder="Full Name" value={newReceptionist.name} onChange={e => setNewReceptionist({ ...newReceptionist, name: e.target.value })} className={inputClass} />
+                                    <input type="email" placeholder="Email" value={newReceptionist.email} onChange={e => setNewReceptionist({ ...newReceptionist, email: e.target.value })} className={inputClass} />
+                                    <input type="text" placeholder="Phone" value={newReceptionist.phone} onChange={e => setNewReceptionist({ ...newReceptionist, phone: e.target.value })} className={inputClass} />
+                                </div>
+                                <Button onClick={handleAddReceptionist} className="bg-white hover:bg-slate-100 text-black font-bold">Create Receptionist Account</Button>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Receptionist List */}
+                    {staffLoading ? (
+                        <div className="space-y-3">{[1].map(i => <div key={i} className="animate-pulse bg-slate-900 rounded-2xl h-20 border border-slate-800"></div>)}</div>
+                    ) : staff.receptionists.length === 0 ? (
+                        <div className="bg-slate-900/50 rounded-2xl p-12 text-center border border-dashed border-slate-800">
+                            <p className="text-slate-500 text-sm">No receptionists added yet.</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-4 sm:grid-cols-2">
+                            {staff.receptionists.map((recep: any) => (
+                                <Card key={recep._id} className="bg-slate-900 border-slate-800 hover:border-slate-700 transition-colors">
+                                    <CardContent className="p-5 flex items-center gap-4">
+                                        <div className="h-12 w-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-lg font-playfair shrink-0">
+                                            {recep.name?.charAt(0)}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-white truncate">{recep.name}</p>
+                                            <p className="text-xs text-slate-500 truncate">{recep.email}</p>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="border-indigo-500/30 text-indigo-400 hover:bg-indigo-500/10 gap-1.5 shrink-0"
+                                            onClick={() => setPasswordModal({ open: true, id: recep._id, name: recep.name, type: 'receptionist' })}
                                         >
                                             <Key className="w-3.5 h-3.5" /> Set Password
                                         </Button>
@@ -1593,16 +1700,16 @@ export default function HospitalDashboardPage() {
             )}
             {/******** SET PASSWORD MODAL ********/}
             {passwordModal.open && (
-                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setPasswordModal({ open: false, doctorId: '', doctorName: '' })}>
+                <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={() => setPasswordModal({ open: false, id: '', name: '', type: 'doctor' })}>
                     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="text-lg font-bold text-white font-playfair">Set Doctor Password</h3>
-                            <Button size="icon" variant="ghost" onClick={() => setPasswordModal({ open: false, doctorId: '', doctorName: '' })}>
+                            <h3 className="text-lg font-bold text-white font-playfair">Set {passwordModal.type === 'doctor' ? 'Doctor' : 'Receptionist'} Password</h3>
+                            <Button size="icon" variant="ghost" onClick={() => setPasswordModal({ open: false, id: '', name: '', type: 'doctor' })}>
                                 <X className="w-4 h-4 text-slate-400" />
                             </Button>
                         </div>
                         <p className="text-sm text-slate-400 mb-4">
-                            Setting login password for <strong className="text-white">{passwordModal.doctorName}</strong>.
+                            Setting login password for <strong className="text-white">{passwordModal.name}</strong>.
                         </p>
                         <input
                             type="password"

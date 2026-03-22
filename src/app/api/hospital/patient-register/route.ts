@@ -11,8 +11,8 @@ export async function POST(request: NextRequest) {
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
-        if (!authUser || authUser.role !== 'hospital') {
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'receptionist')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const body = await request.json();
@@ -68,7 +68,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ 
             success: true, 
             patient: user, 
-            tempPassword 
+            tempPassword,
+            hospitalId: authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId
         });
 
     } catch (error: any) {
