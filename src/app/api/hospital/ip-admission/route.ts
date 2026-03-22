@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         const status = searchParams.get('status') || 'admitted';
 
         const admissions = await IPAdmission.find({ 
-            hospitalId: authUser.userId,
+            hospitalId: authUser.role === 'receptionist' ? authUser.hospitalId : authUser.userId,
             status 
         })
         .populate('patientId', 'name email firstName lastName phone')
