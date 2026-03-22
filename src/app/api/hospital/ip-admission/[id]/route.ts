@@ -5,9 +5,10 @@ import { getAuthenticatedUser } from '@/lib/auth';
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         
@@ -37,7 +38,7 @@ export async function PATCH(
         if (addNote) {
             const { note, vitals, addedBy } = addNote;
             admission = await IPAdmission.findByIdAndUpdate(
-                params.id,
+                id,
                 { 
                     $set: update,
                     $push: { 
@@ -54,7 +55,7 @@ export async function PATCH(
         } else {
             // Regular field update
             admission = await IPAdmission.findByIdAndUpdate(
-                params.id,
+                id,
                 { $set: update },
                 { new: true }
             );

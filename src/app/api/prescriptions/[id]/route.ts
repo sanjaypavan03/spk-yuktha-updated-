@@ -6,9 +6,10 @@ import { getAuthenticatedUser } from '@/lib/auth';
 
 export async function PATCH(
     request: NextRequest, 
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: prescriptionId } = await params;
         await dbConnect();
         const authUser = await getAuthenticatedUser(request);
         if (!authUser || (authUser.role !== 'doctor' && authUser.role !== 'hospital')) {
@@ -21,8 +22,6 @@ export async function PATCH(
         if (!status || !['Active', 'Completed', 'Cancelled'].includes(status)) {
             return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
         }
-
-        const prescriptionId = params.id;
 
         // Security: Ensure the doctor is the one who issued it OR it's a hospital admin
         const query: any = { _id: prescriptionId };
@@ -43,7 +42,13 @@ export async function PATCH(
         // If cancelled, should we also delete or mark pill tracking?
         // Requirement says 'Cancel' prescription.
         if (status === 'Cancelled') {
-            await PillTracking.deleteMany({ prescriptionId: prescriptionId, taken: false });
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            await PillTracking.deleteMany({ 
+                prescriptionId: prescriptionId, 
+                taken: false,
+                date: { $gte: today }
+            });
         }
 
         return NextResponse.json({ success: true, prescription: updatedPrescription });
