@@ -13,6 +13,7 @@ export async function middleware(request: NextRequest) {
             pathname.startsWith('/api/doctor/login') ||
             pathname.startsWith('/api/receptionist/login') ||
             pathname.startsWith('/api/hospital/login') ||
+            pathname.startsWith('/api/admin/login') ||
             pathname.startsWith('/api/hospital/register') ||
             pathname.startsWith('/api/emergency/') ||
             pathname.startsWith('/api/appointments/slots') ||
