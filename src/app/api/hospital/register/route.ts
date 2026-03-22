@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
             hospital._id.toString(),
             hospital.email,
             'hospital',
+            hospital.name,
             ['doctor']
         );
 

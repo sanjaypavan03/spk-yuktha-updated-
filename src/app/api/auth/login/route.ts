@@ -9,9 +9,21 @@ import dbConnect from '@/lib/db';
 import User from '@/models/User';
 import { generateToken, setAuthCookie } from '@/lib/auth';
 import { getQRPublicUrl } from '@/lib/qr';
+import { checkRateLimit, clearRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown';
+    const rateLimitKey = 'login:' + ip;
+    const { allowed, retryAfterMs } = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
+    
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Try again in ' + Math.ceil(retryAfterMs / 60000) + ' minutes.' },
+        { status: 429, headers: { 'Retry-After': Math.ceil(retryAfterMs / 1000).toString() } }
+      );
+    }
+
     console.log('🔐 ========== LOGIN ATTEMPT ==========');
     await dbConnect();
 
@@ -110,6 +122,7 @@ export async function POST(request: NextRequest) {
 
     // Set HTTP-only cookie
     setAuthCookie(response, token);
+    clearRateLimit(rateLimitKey);
 
     return response;
   } catch (error) {

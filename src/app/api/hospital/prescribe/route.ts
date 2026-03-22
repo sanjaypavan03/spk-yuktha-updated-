@@ -12,13 +12,31 @@ export async function POST(request: NextRequest) {
 
         // 1. Authentication Check
         const authUser = await getAuthenticatedUser(request);
-        if (!authUser || authUser.role !== 'hospital') {
+        const role = authUser?.role;
+        if (!authUser || (role !== 'hospital' && role !== 'doctor')) {
             console.warn('❌ Unauthorized prescription attempt');
-            return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
+            return NextResponse.json({ error: 'Unauthorized: Hospital or Doctor access required' }, { status: 401 });
         }
 
-        const hospitalId = authUser.userId;
-        console.log('🏥 Hospital ID from JWT:', hospitalId);
+        let resolvedHospitalId = '';
+        let resolvedDoctorId = undefined;
+        let resolvedDoctorName = 'Hospital Staff';
+
+        if (role === 'hospital') {
+            resolvedHospitalId = authUser.userId;
+        } else if (role === 'doctor') {
+            const Doctor = (await import('@/models/Doctor')).default;
+            const doctor = await Doctor.findById(authUser.userId);
+            if (!doctor) {
+                return NextResponse.json({ error: 'Doctor record not found' }, { status: 404 });
+            }
+            resolvedHospitalId = doctor.hospitalId.toString();
+            resolvedDoctorId = authUser.userId;
+            resolvedDoctorName = doctor.name;
+        }
+
+        console.log('🏥 Resolved Hospital ID:', resolvedHospitalId);
+        if (resolvedDoctorId) console.log('🩺 Resolved Doctor ID:', resolvedDoctorId);
 
         // 2. Body Validation
         let body;
@@ -63,7 +81,9 @@ export async function POST(request: NextRequest) {
         // 4. Create Prescription
         const prescriptionData = {
             patientId: userId,
-            hospitalId: hospitalId,
+            hospitalId: resolvedHospitalId,
+            doctorId: resolvedDoctorId,
+            doctorName: resolvedDoctorName,
             medicineName: name,
             dosage: dosage,
             frequency: time, // mapped from 'time'
@@ -135,5 +155,28 @@ export async function POST(request: NextRequest) {
             error: 'Internal Server Error',
             details: process.env.NODE_ENV === 'development' ? error.message : undefined
         }, { status: 500 });
+    }
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        await dbConnect();
+        const authUser = await getAuthenticatedUser(request);
+        if (!authUser || (authUser.role !== 'hospital' && authUser.role !== 'doctor')) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { searchParams } = new URL(request.url);
+        const userId = searchParams.get('userId');
+
+        if (!userId) {
+            return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+        }
+
+        const prescriptions = await Prescription.find({ patientId: userId }).sort({ issuedAt: -1 });
+        return NextResponse.json({ success: true, prescriptions });
+    } catch (error) {
+        console.error('Fetch Prescriptions Error:', error);
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }

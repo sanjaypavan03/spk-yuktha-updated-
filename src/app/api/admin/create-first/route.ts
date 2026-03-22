@@ -5,6 +5,10 @@ import bcrypt from 'bcrypt';
 
 export async function POST(request: NextRequest) {
     try {
+        if (process.env.NODE_ENV === 'production' && process.env.ALLOW_ADMIN_CREATE !== 'true') {
+            return NextResponse.json({ error: 'Endpoint disabled in production' }, { status: 403 });
+        }
+
         await dbConnect();
 
         // Check if any admin exists

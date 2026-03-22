@@ -21,6 +21,8 @@ import {
   Settings,
   Shield,
   Calendar,
+  MessageSquare,
+  TestTube2,
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -42,6 +44,8 @@ const menuItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
   { href: "/dashboard/med-tracker", icon: Pill, label: "Medicine Tracker" },
   { href: "/dashboard/reports", icon: FileText, label: "Report Analysis" },
+  { href: "/dashboard/notes", icon: MessageSquare, label: "Notes" },
+  { href: "/dashboard/tests", icon: TestTube2, label: "Lab Tests" },
   { href: "/dashboard/family", icon: Users, label: "Family" },
   { href: "/dashboard/appointments", icon: Calendar, label: "Appointments" },
   { href: "/dashboard/emergency-qr", icon: QrCode, label: "Emergency QR" },

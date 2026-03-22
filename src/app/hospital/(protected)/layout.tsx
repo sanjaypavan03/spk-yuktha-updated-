@@ -2,16 +2,29 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Activity, Calendar, BarChart2, LogOut, QrCode } from "lucide-react";
+import { Activity, Calendar, BarChart2, LogOut, QrCode, UserPlus, BedDouble, AlertTriangle, Upload } from "lucide-react";
 import Link from 'next/link';
 
 function HospitalSidebar() {
     const pathname = usePathname();
     const router = useRouter();
 
+    const [alertCount, setAlertCount] = useState(0);
+
+    useEffect(() => {
+        fetch('/api/hospital/emergency-flag?resolved=false')
+            .then(r => r.json())
+            .then(d => setAlertCount(d.flags?.length || 0))
+            .catch(() => {});
+    }, []);
+
     const menu = [
         { label: "Dashboard", href: "/hospital/dashboard", icon: QrCode },
         { label: "Appointments", href: "/hospital/appointments", icon: Calendar },
+        { label: "Upload Reports", href: "/hospital/upload-report", icon: Upload },
+        { label: "Register Patient", href: "/hospital/register-patient", icon: UserPlus },
+        { label: "Inpatients", href: "/hospital/inpatients", icon: BedDouble },
+        { label: "Alerts", href: "/hospital/alerts", icon: AlertTriangle, badge: alertCount },
         { label: "Analytics", href: "/hospital/analytics", icon: BarChart2 },
     ];
 
@@ -45,7 +58,12 @@ function HospitalSidebar() {
                                 }`}
                         >
                             <item.icon className="w-5 h-5" />
-                            {item.label}
+                            <span className="flex-1">{item.label}</span>
+                            {(item as any).badge > 0 && (
+                                <span className="bg-rose-500 text-white text-[10px] font-black min-w-[20px] h-5 flex items-center justify-center rounded-full px-1.5">
+                                    {(item as any).badge}
+                                </span>
+                            )}
                         </Link>
                     )
                 })}
@@ -69,7 +87,8 @@ function HospitalBottomNav() {
     const menu = [
         { label: "Scan QR", href: "/hospital/dashboard", icon: QrCode },
         { label: "Visits", href: "/hospital/appointments", icon: Calendar },
-        { label: "Analytics", href: "/hospital/analytics", icon: BarChart2 },
+        { label: "Register", href: "/hospital/register-patient", icon: UserPlus },
+        { label: "Inpatients", href: "/hospital/inpatients", icon: BedDouble },
     ];
 
     return (

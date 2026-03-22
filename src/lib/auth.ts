@@ -19,7 +19,9 @@ export interface JWTPayload {
   userId: string;
   email: string;
   role: 'user' | 'admin' | 'hospital' | 'doctor';
+  name?: string;
   hospitalRoles?: string[];
+  hospitalPlan?: 'starter' | 'growth' | 'pro';
   iat?: number;
   exp?: number;
 }
@@ -31,9 +33,12 @@ export async function generateToken(
   userId: string,
   email: string,
   role: 'user' | 'admin' | 'hospital' | 'doctor' = 'user',
-  hospitalRoles?: string[]
+  name?: string,
+  hospitalRoles?: string[],
+  hospitalPlan?: string
 ): Promise<string> {
   const payload: any = { userId, email, role };
+  if (name) payload.name = name;
   if (hospitalRoles) {
     // CRITICAL FIX: Mongoose arrays are Proxies that confuse structuredClone/SignJWT.
     // We must strictly sanitize this to a plain JS array of strings.
@@ -43,6 +48,10 @@ export async function generateToken(
       console.error("Sanitization failed for hospitalRoles, defaulting to empty array", e);
       payload.hospitalRoles = [];
     }
+  }
+
+  if (hospitalPlan) {
+    payload.hospitalPlan = hospitalPlan;
   }
 
   return await new SignJWT(payload)
@@ -87,7 +96,9 @@ export interface AuthenticatedUser {
   userId: string;
   email: string;
   role: 'user' | 'admin' | 'hospital' | 'doctor';
+  name?: string;
   hospitalRoles?: string[];
+  hospitalPlan?: string;
 }
 
 /**
@@ -111,8 +122,10 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<Authen
   return {
     userId: payload.userId,
     email: payload.email,
+    name: payload.name,
     role: payload.role || 'user', // Default to user for backward compatibility
     hospitalRoles: payload.hospitalRoles,
+    hospitalPlan: payload.hospitalPlan,
   };
 }
 

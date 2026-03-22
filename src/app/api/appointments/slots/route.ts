@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Appointment from '@/models/Appointment';
+import { getAuthenticatedUser } from '@/lib/auth';
 
 // Generate slots from 09:00 AM to 05:00 PM (16 slots)
 function generateAllSlots(): string[] {
@@ -25,11 +26,21 @@ export async function GET(request: NextRequest) {
         await dbConnect();
 
         const { searchParams } = new URL(request.url);
-        const hospitalId = searchParams.get('hospitalId');
+        let hospitalId = searchParams.get('hospitalId');
+        const doctorId = searchParams.get('doctorId');
         const dateParam = searchParams.get('date');
 
-        if (!hospitalId || !dateParam) {
-            return NextResponse.json({ error: 'hospitalId and date are required' }, { status: 400 });
+        if (!dateParam) {
+            return NextResponse.json({ error: 'date is required' }, { status: 400 });
+        }
+
+        const authUser = await getAuthenticatedUser(request);
+        if (!hospitalId && authUser?.role === 'hospital') {
+            hospitalId = authUser.userId;
+        }
+
+        if (!hospitalId) {
+            return NextResponse.json({ error: 'hospitalId is required' }, { status: 400 });
         }
 
         // Find all appointments for this hospital and date that are NOT cancelled
@@ -38,11 +49,17 @@ export async function GET(request: NextRequest) {
         const endOfDay = new Date(dateParam);
         endOfDay.setHours(23, 59, 59, 999);
 
-        const bookedAppointments = await Appointment.find({
+        const query: any = {
             hospitalId,
             date: { $gte: startOfDay, $lte: endOfDay },
             status: { $ne: 'cancelled' }
-        });
+        };
+
+        if (doctorId) {
+            query.doctorId = doctorId;
+        }
+
+        const bookedAppointments = await Appointment.find(query);
 
         const bookedSlots = bookedAppointments.map(app => app.timeSlot);
         const allSlots = generateAllSlots();
@@ -51,6 +68,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
+            slots: availableSlots, // Changed from 'available' to 'slots' to match frontend usage
             available: availableSlots,
             booked: bookedSlots
         });

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Card, CardContent } from "@/components/ui/card";
-import { Lock, Shield, FileText, Activity, Image as ImageIcon, Pill, ChevronDown } from "lucide-react";
+import { Lock, Shield, FileText, Activity, Image as ImageIcon, Pill, ChevronDown, Calendar } from "lucide-react";
 import { format } from 'date-fns';
 import { SecretVaultModal } from "@/components/dashboard/secret-vault-modal";
 

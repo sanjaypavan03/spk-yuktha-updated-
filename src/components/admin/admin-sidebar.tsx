@@ -5,7 +5,8 @@ import {
     Users,
     LayoutDashboard,
     LogOut,
-    Hospital
+    Hospital,
+    Settings
 } from "lucide-react";
 import {
     Sidebar,
@@ -43,14 +44,24 @@ export function AdminSidebar() {
 
     const menuItems = [
         {
+            title: "Overview",
+            url: "/admin/overview",
+            icon: LayoutDashboard,
+        },
+        {
             title: "Hospitals",
-            url: "/admin/dashboard", // Default to hospitals page
+            url: "/admin/dashboard",
             icon: LocalHospitalIcon,
         },
         {
             title: "Users",
             url: "/admin/dashboard/users",
             icon: Users,
+        },
+        {
+            title: "Settings",
+            url: "/admin/settings",
+            icon: Settings,
         },
     ];
 
@@ -66,7 +77,8 @@ export function AdminSidebar() {
                         <div className="bg-slate-900 text-white p-1 rounded-md">
                             <LayoutDashboard className="h-5 w-5" />
                         </div>
-                        <span className="font-semibold text-lg">Admin Panel</span>
+                        <span className="font-semibold text-lg">Yuktha Super Admin</span>
+                        <span className="w-2 h-2 bg-teal-500 rounded-full" />
                     </div>
                 </SidebarHeader>
                 <SidebarContent>

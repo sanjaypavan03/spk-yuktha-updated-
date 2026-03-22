@@ -18,6 +18,7 @@ export default function DashboardPage() {
   // For demo notification slide down
   const [showNotifications, setShowNotifications] = useState(false);
   const [refillAlerts, setRefillAlerts] = useState<any[]>([]);
+  const [clinicalNotes, setClinicalNotes] = useState<any[]>([]);
 
   const handleToggleTaken = async (pillId: string, status: { taken?: boolean; skipped?: boolean }, e?: React.MouseEvent) => {
     if (e) e.stopPropagation(); // Prevent card clicks if any
@@ -41,17 +42,19 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [pillsRes, apptsRes, scoreRes, alertsRes] = await Promise.all([
-          fetch('/api/patient/pills/today').catch(() => null),
+        const [pillsRes, apptsRes, scoreRes, alertsRes, notesRes] = await Promise.all([
+          fetch('/api/patient/pills/today?tzOffset=' + (-(new Date().getTimezoneOffset()))).catch(() => null),
           fetch('/api/appointments?date=today').catch(() => null),
           fetch('/api/patient/health-score').catch(() => null),
-          fetch('/api/patient/refill-alerts').catch(() => null)
+          fetch('/api/patient/refill-alerts').catch(() => null),
+          fetch('/api/patient/clinical-notes').catch(() => null)
         ]);
 
         if (pillsRes?.ok) setPills((await pillsRes.json()).pills || []);
         if (apptsRes?.ok) setAppointments((await apptsRes.json()).appointments || []);
         if (scoreRes?.ok) setHealthScore(await scoreRes.json());
         if (alertsRes?.ok) setRefillAlerts((await alertsRes.json()).alerts || []);
+        if (notesRes?.ok) setClinicalNotes((await notesRes.json()).notes || []);
       } catch (e) {
         console.error("Dashboard fetch error", e);
       } finally {
@@ -223,6 +226,34 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
+
+        {/* 2.5 DOCTOR'S NOTES & ADVICE */}
+        {clinicalNotes.length > 0 && (
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-[20px] font-bold text-slate-900 font-playfair tracking-tight mb-5">Doctor's Advice</h2>
+            <div className="space-y-4">
+              {clinicalNotes.map((note, i) => (
+                <div key={`note-${i}`} className="bg-white rounded-[24px] p-5 border-l-4 border-emerald-500 shadow-[0_4px_20px_rgba(0,0,0,0.03)]">
+                  <div className="flex justify-between items-start mb-3">
+                    <div className="flex items-center gap-2">
+                       <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center">
+                          <User className="w-4 h-4 text-emerald-600" />
+                       </div>
+                       <div>
+                          <p className="font-bold text-slate-900 text-sm">Dr. {note.doctorId?.name}</p>
+                          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{note.doctorId?.specialty}</p>
+                       </div>
+                    </div>
+                    <span className="text-[10px] text-slate-300 font-bold">{new Date(note.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className="text-slate-600 text-[13px] leading-relaxed font-medium">
+                    {note.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* 3. QUICK ACCESS - Refined Grid */}
         <div className="pb-10">

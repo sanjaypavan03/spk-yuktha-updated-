@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Home, Pill, Plus, FileText, User, Calendar, QrCode } from "lucide-react";
+import { Home, Pill, Plus, FileText, User, Calendar, QrCode, MessageSquare, TestTube2 } from "lucide-react";
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
@@ -57,6 +57,14 @@ export function BottomNavbar() {
                                         <button onClick={() => handleAction('/dashboard/reports')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
                                             <span className="font-bold text-[14px] text-slate-800 tracking-tight">Analyse Report</span>
                                             <div className="bg-indigo-50 text-indigo-600 p-2 rounded-[12px]"><FileText className="w-4 h-4" strokeWidth={2.5} /></div>
+                                        </button>
+                                        <button onClick={() => handleAction('/dashboard/notes')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
+                                            <span className="font-bold text-[14px] text-slate-800 tracking-tight">Notes</span>
+                                            <div className="bg-violet-50 text-violet-600 p-2 rounded-[12px]"><MessageSquare className="w-4 h-4" strokeWidth={2.5} /></div>
+                                        </button>
+                                        <button onClick={() => handleAction('/dashboard/tests')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-slate-100 active:scale-95 transition-all">
+                                            <span className="font-bold text-[14px] text-slate-800 tracking-tight">Lab Tests</span>
+                                            <div className="bg-cyan-50 text-cyan-600 p-2 rounded-[12px]"><TestTube2 className="w-4 h-4" strokeWidth={2.5} /></div>
                                         </button>
                                         <button onClick={() => handleAction('/dashboard/emergency-qr')} className="flex items-center justify-between w-[180px] bg-white px-5 py-4 rounded-[16px] shadow-[0_10px_40px_rgba(0,0,0,0.1)] border border-red-50 active:scale-95 transition-all">
                                             <span className="font-bold text-[14px] text-red-600 tracking-tight">Emergency Hub</span>

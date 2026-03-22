@@ -154,11 +154,11 @@ export async function DELETE(
     }
 
     // Check ownership - handle both userId (Medicine) and patientId (Prescription)
-    const ownerId = medDoc.userId || (medDoc as any).patientId;
-    const medicineOwnerId = ownerId?.toString();
-    const currentUserId = authUser.userId.toString();
+    const medicalOwnerId = (medDoc as any).userId || (medDoc as any).patientId;
+    const medicineOwnerIdStr = medicalOwnerId?.toString();
+    const currentUserIdStr = authUser.userId.toString();
 
-    if (medicineOwnerId !== currentUserId) {
+    if (medicineOwnerIdStr !== currentUserIdStr) {
       console.log(`❌ Delete failed: Ownership mismatch. Owner: ${medicineOwnerId}, Requester: ${currentUserId}`);
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to delete this medication' },

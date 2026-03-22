@@ -53,6 +53,18 @@ export async function GET(request: NextRequest) {
             addPatient(a.patientId, a.date, 'appointment');
         });
 
+        // 2. Fetch MedicalInfo for all found patients to get controlLevel
+        const patientIds = Array.from(patientMap.keys());
+        const MedicalInfo = (await import('@/models/MedicalInfo')).default;
+        const medicalInfos = await MedicalInfo.find({ userId: { $in: patientIds } });
+        
+        medicalInfos.forEach(info => {
+            const pData = patientMap.get(info.userId.toString());
+            if (pData) {
+                pData.conditionControlLevel = info.conditionControlLevel || 'Stable';
+            }
+        });
+
         const patients = Array.from(patientMap.values()).sort((a, b) =>
             new Date(b.lastVisitDate).getTime() - new Date(a.lastVisitDate).getTime()
         );

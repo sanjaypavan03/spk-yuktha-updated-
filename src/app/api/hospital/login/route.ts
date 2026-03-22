@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Hospital from '@/models/Hospital';
 import { generateToken, setAuthCookie } from '@/lib/auth';
+import { checkRateLimit, clearRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown';
+        const rateLimitKey = 'login:' + ip;
+        const { allowed, retryAfterMs } = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000);
+        
+        if (!allowed) {
+            return NextResponse.json(
+                { error: 'Too many login attempts. Try again in ' + Math.ceil(retryAfterMs / 60000) + ' minutes.' },
+                { status: 429, headers: { 'Retry-After': Math.ceil(retryAfterMs / 1000).toString() } }
+            );
+        }
+
         await dbConnect();
 
         // Safe body parsing
@@ -88,7 +100,9 @@ export async function POST(request: NextRequest) {
                 hospitalId,
                 hospital.email,
                 'hospital',
-                safeRoles
+                hospital.name,
+                safeRoles,
+                hospital.plan || 'starter'
             );
         } catch (tokenErr) {
             console.error('❌ Token generation failed:', tokenErr);
@@ -110,6 +124,7 @@ export async function POST(request: NextRequest) {
         });
 
         setAuthCookie(response, token);
+        clearRateLimit(rateLimitKey);
 
         return response;
 

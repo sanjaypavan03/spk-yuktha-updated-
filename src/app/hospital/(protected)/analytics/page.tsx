@@ -1,152 +1,184 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, Calendar, Pill, AlertTriangle, TrendingUp } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, Users, CheckCircle2, FileText, ArrowLeft, Calendar } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
 
-export default function HospitalAnalyticsPage() {
-    const [stats, setStats] = useState<any>(null);
+export default function AnalyticsPage() {
+    const { toast } = useToast();
+    const [performance, setPerformance] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchAnalytics = async () => {
-            try {
-                const res = await fetch('/api/hospital/analytics');
-                if (res.ok) {
-                    const data = await res.json();
-                    setStats(data);
-                }
-            } catch (error) {
-                console.error("Failed to fetch analytics:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchAnalytics();
+        fetchPerformance();
     }, []);
 
-    if (loading) {
-        return (
-            <div className="space-y-6 animate-pulse">
-                <div className="h-10 bg-slate-900 rounded-lg w-1/4"></div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-slate-900 rounded-2xl"></div>)}
-                </div>
-                <div className="h-64 bg-slate-900 rounded-2xl"></div>
-            </div>
-        );
-    }
-
-    if (!stats) return null;
+    const fetchPerformance = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch('/api/hospital/analytics/performance');
+            if (res.ok) {
+                const data = await res.json();
+                setPerformance(data.performance || []);
+            } else {
+                toast({ variant: 'destructive', description: 'Failed to load analytics.' });
+            }
+        } catch (e) {
+            toast({ variant: 'destructive', description: 'Network error.' });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
-        <div className="space-y-6">
-            <div className="mb-8">
-                <h2 className="text-3xl font-bold text-white font-playfair tracking-tight mb-1">
-                    Hospital Analytics
-                </h2>
-                <p className="text-slate-400 font-medium text-sm">
-                    Overview of your facility's performance, patient intake, and prescription volume.
-                </p>
+        <div className="space-y-8 animate-in fade-in duration-700">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => window.location.href = '/hospital/dashboard'}
+                        className="text-slate-500 hover:text-white mb-2 -ml-2"
+                    >
+                        <ArrowLeft className="w-4 h-4 mr-1" /> Back to Dashboard
+                    </Button>
+                    <h2 className="text-4xl font-black text-white font-playfair tracking-tight">Performance Analytics</h2>
+                    <p className="text-slate-400 font-medium">Monthly efficiency metrics for medical staff.</p>
+                </div>
+                <div className="bg-slate-900 border border-slate-800 rounded-2xl px-4 py-2 flex items-center gap-3">
+                    <Calendar className="w-5 h-5 text-[#02B69A]" />
+                    <span className="text-sm font-bold text-white uppercase tracking-widest">{format(new Date(), 'MMMM yyyy')}</span>
+                </div>
             </div>
 
-            {/* Core Metrics */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <Card className="bg-slate-900 border-slate-800 shadow-none">
-                    <CardContent className="p-5">
-                        <div className="w-10 h-10 bg-[#02B69A]/10 text-[#02B69A] rounded-xl flex items-center justify-center mb-4">
-                            <Users className="w-5 h-5" />
+            {loading ? (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {[1, 2, 3, 4].map(i => <div key={i} className="animate-pulse bg-slate-900 rounded-3xl h-32 border border-slate-800"></div>)}
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-8">
+                    {/* Performance Table */}
+                    <Card className="bg-slate-950 border-slate-800 overflow-hidden shadow-2xl">
+                        <div className="bg-slate-900/50 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
+                            <h3 className="font-bold text-white font-playfair uppercase tracking-widest text-sm">Doctor Performance Metrics</h3>
+                            <TrendingUp className="w-5 h-5 text-[#02B69A]" />
                         </div>
-                        <p className="text-3xl font-bold text-white mb-1">{stats.totalPatients || 0}</p>
-                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Unique Patients</p>
-                    </CardContent>
-                </Card>
+                        <CardContent className="p-0 overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-slate-900/30 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                        <th className="px-6 py-4">Doctor Name</th>
+                                        <th className="px-6 py-4">Specialty</th>
+                                        <th className="px-6 py-4 text-center">Appointments</th>
+                                        <th className="px-6 py-4 text-center">Completed</th>
+                                        <th className="px-6 py-4 text-center">Prescriptions</th>
+                                        <th className="px-6 py-4 text-right">Success Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-800/50">
+                                    {performance.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="px-6 py-12 text-center text-slate-600 italic">No performance data available for this month.</td>
+                                        </tr>
+                                    ) : (
+                                        performance.map((doc: any, idx: number) => (
+                                            <tr key={idx} className="hover:bg-slate-900/40 transition-colors group">
+                                                <td className="px-6 py-5">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-9 h-9 rounded-xl bg-[#02B69A]/10 text-[#02B69A] flex items-center justify-center font-bold font-playfair">
+                                                            {doc.name.charAt(0)}
+                                                        </div>
+                                                        <span className="font-bold text-white group-hover:text-[#02B69A] transition-colors">{doc.name}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5">
+                                                    <span className="text-sm font-medium text-slate-400">{doc.specialty || 'General'}</span>
+                                                </td>
+                                                <td className="px-6 py-5 text-center">
+                                                    <div className="inline-flex items-center justify-center w-10 h-7 bg-slate-900 rounded-lg text-sm font-bold text-white">
+                                                        {doc.appointmentsCount}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-center">
+                                                    <div className="flex items-center justify-center gap-1.5 text-emerald-400 font-bold">
+                                                        <CheckCircle2 className="w-4 h-4" />
+                                                        <span>{doc.completedCount}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-center">
+                                                    <div className="flex items-center justify-center gap-1.5 text-indigo-400 font-bold">
+                                                        <FileText className="w-4 h-4" />
+                                                        <span>{doc.prescriptionsCount}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-right">
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span className={`text-sm font-black ${doc.completionRate > 80 ? 'text-[#02B69A]' : doc.completionRate > 50 ? 'text-amber-400' : 'text-rose-400'}`}>
+                                                            {doc.completionRate}%
+                                                        </span>
+                                                        <div className="w-24 h-1.5 bg-slate-900 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className={`h-full transition-all duration-1000 ${doc.completionRate > 80 ? 'bg-[#02B69A]' : doc.completionRate > 50 ? 'bg-amber-400' : 'bg-rose-400'}`}
+                                                                style={{ width: `${doc.completionRate}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </CardContent>
+                    </Card>
 
-                <Card className="bg-slate-900 border-slate-800 shadow-none">
-                    <CardContent className="p-5">
-                        <div className="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center mb-4">
-                            <Calendar className="w-5 h-5" />
-                        </div>
-                        <p className="text-3xl font-bold text-white mb-1">{stats.appointmentsThisMonth || 0}</p>
-                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Visits (Month)</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-slate-900 border-slate-800 shadow-none">
-                    <CardContent className="p-5">
-                        <div className="w-10 h-10 bg-blue-500/10 text-blue-400 rounded-xl flex items-center justify-center mb-4">
-                            <Pill className="w-5 h-5" />
-                        </div>
-                        <p className="text-3xl font-bold text-white mb-1">{stats.totalPrescriptions || 0}</p>
-                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">Total Prescriptions</p>
-                    </CardContent>
-                </Card>
-
-                <Card className="bg-slate-900 border-slate-800 shadow-none">
-                    <CardContent className="p-5">
-                        <div className="w-10 h-10 bg-rose-500/10 text-rose-400 rounded-xl flex items-center justify-center mb-4">
-                            <AlertTriangle className="w-5 h-5" />
-                        </div>
-                        <div className="flex items-end gap-2 mb-1">
-                            <p className="text-3xl font-bold text-white">{stats.noShowRate || 0}%</p>
-                        </div>
-                        <p className="text-xs text-slate-400 font-medium uppercase tracking-wider">No-Show Rate</p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Chart Area */}
-            <Card className="bg-slate-900 border-slate-800 shadow-none">
-                <CardContent className="p-6">
-                    <div className="flex items-center gap-2 mb-6 text-white font-bold font-playfair tracking-wide text-lg">
-                        <TrendingUp className="w-5 h-5 text-[#02B69A]" /> Prescriptions (Last 7 Days)
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Card className="bg-slate-900 border-slate-800 p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-[#02B69A]/10 flex items-center justify-center">
+                                    <Users className="w-6 h-6 text-[#02B69A]" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Doctors</p>
+                                    <h4 className="text-2xl font-black text-white">{performance.length}</h4>
+                                </div>
+                            </div>
+                        </Card>
+                        <Card className="bg-slate-900 border-slate-800 p-6">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center">
+                                    <FileText className="w-6 h-6 text-indigo-400" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Digital Prescriptions</p>
+                                    <h4 className="text-2xl font-black text-white">
+                                        {performance.reduce((acc, doc) => acc + doc.prescriptionsCount, 0)}
+                                    </h4>
+                                </div>
+                            </div>
+                        </Card>
+                        <Card className="bg-slate-900 border-slate-800 p-6 border-l-4 border-l-[#02B69A]">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-slate-950 flex items-center justify-center">
+                                    <TrendingUp className="w-6 h-6 text-[#02B69A]" />
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Avg Completion</p>
+                                    <h4 className="text-2xl font-black text-white">
+                                        {performance.length > 0 
+                                            ? Math.round(performance.reduce((acc, doc) => acc + doc.completionRate, 0) / performance.length)
+                                            : 0}%
+                                    </h4>
+                                </div>
+                            </div>
+                        </Card>
                     </div>
-
-                    <div className="h-72 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={stats.prescriptionsLast7Days} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                                <defs>
-                                    <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#02B69A" stopOpacity={0.3} />
-                                        <stop offset="95%" stopColor="#02B69A" stopOpacity={0} />
-                                    </linearGradient>
-                                </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
-                                <XAxis
-                                    dataKey="day"
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#64748b', fontSize: 12 }}
-                                    dy={10}
-                                />
-                                <YAxis
-                                    axisLine={false}
-                                    tickLine={false}
-                                    tick={{ fill: '#64748b', fontSize: 12 }}
-                                />
-                                <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#1e293b', borderRadius: '8px', color: '#fff' }}
-                                    itemStyle={{ color: '#02B69A' }}
-                                />
-                                <Area
-                                    type="monotone"
-                                    dataKey="count"
-                                    stroke="#02B69A"
-                                    strokeWidth={3}
-                                    fillOpacity={1}
-                                    fill="url(#colorCount)"
-                                />
-                            </AreaChart>
-                        </ResponsiveContainer>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <p className="text-center text-slate-500 text-xs mt-4">
-                Metrics are aggregated securely and anonymized per hospital tenant.
-            </p>
+                </div>
+            )}
         </div>
     );
 }

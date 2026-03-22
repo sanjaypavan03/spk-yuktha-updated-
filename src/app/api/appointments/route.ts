@@ -6,17 +6,30 @@ import { getAuthenticatedUser } from '@/lib/auth';
 export async function POST(request: NextRequest) {
     try {
         const authUser = await getAuthenticatedUser(request);
-        if (!authUser || authUser.role !== 'user') {
+        if (!authUser || (authUser.role !== 'user' && authUser.role !== 'hospital')) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         await dbConnect();
         const body = await request.json();
-        const { hospitalId, doctorId, date, timeSlot, reason } = body;
+        const { hospitalId, doctorId, date, timeSlot, reason, patientId } = body;
 
-        // Check slot not already taken
+        // Determine patientId: if hospital is booking, patientId must be provided. If user is booking, use their own ID.
+        const targetPatientId = authUser.role === 'hospital' ? patientId : authUser.userId;
+        const targetHospitalId = authUser.role === 'hospital' ? authUser.userId : hospitalId;
+
+        if (!targetPatientId) {
+            return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
+        }
+
+        if (!targetHospitalId) {
+            return NextResponse.json({ error: 'Hospital ID is required' }, { status: 400 });
+        }
+
+        // Check slot not already taken (one appointment per slot per doctor/hospital context)
         const existingAppointment = await Appointment.findOne({
-            hospitalId,
+            hospitalId: targetHospitalId,
+            doctorId,
             date: new Date(date),
             timeSlot,
             status: { $ne: 'cancelled' },
@@ -27,8 +40,8 @@ export async function POST(request: NextRequest) {
         }
 
         const appointment = await Appointment.create({
-            patientId: authUser.userId,
-            hospitalId,
+            patientId: targetPatientId,
+            hospitalId: targetHospitalId,
             doctorId,
             date: new Date(date),
             timeSlot,
@@ -63,20 +76,23 @@ export async function GET(request: NextRequest) {
 
         if (authUser.role === 'hospital') {
             let query: any = { hospitalId: authUser.userId };
+            const doctorId = searchParams.get('doctorId');
+            
+            if (doctorId) {
+                query.doctorId = doctorId;
+            }
+
             if (dateParam) {
-                if (dateParam === 'today') {
-                    const today = new Date();
-                    query.date = {
-                        $gte: new Date(today.setHours(0, 0, 0, 0)),
-                        $lte: new Date(today.setHours(23, 59, 59, 999))
-                    };
-                } else {
-                    query.date = new Date(dateParam);
-                }
+                const startOfDay = new Date(dateParam);
+                startOfDay.setHours(0, 0, 0, 0);
+                const endOfDay = new Date(dateParam);
+                endOfDay.setHours(23, 59, 59, 999);
+                
+                query.date = { $gte: startOfDay, $lte: endOfDay };
             }
 
             const appointments = await Appointment.find(query)
-                .populate('patientId', 'name email firstName lastName')
+                .populate('patientId', 'name email firstName lastName phone')
                 .populate('doctorId', 'name specialty')
                 .sort({ date: 1, timeSlot: 1 });
             return NextResponse.json({ success: true, appointments });

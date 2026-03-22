@@ -8,6 +8,10 @@ export interface IHospital extends Document {
     roles: string[];
     status: 'Active' | 'Disabled';
     contactNumber: string;
+    plan: 'starter' | 'growth' | 'pro';
+    maxDoctors: number;
+    planActivatedAt?: Date;
+    planExpiresAt?: Date;
     createdAt: Date;
     updatedAt: Date;
     comparePassword: (plainPassword: string) => Promise<boolean>;
@@ -47,6 +51,23 @@ const hospitalSchema = new Schema<IHospital>(
         contactNumber: {
             type: String,
             default: '',
+        },
+        plan: {
+            type: String,
+            enum: ['starter', 'growth', 'pro'],
+            default: 'starter',
+        },
+        maxDoctors: {
+            type: Number,
+            default: 3,
+        },
+        planActivatedAt: {
+            type: Date,
+            default: null,
+        },
+        planExpiresAt: {
+            type: Date,
+            default: null,
         },
     },
     {

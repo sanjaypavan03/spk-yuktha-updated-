@@ -12,6 +12,7 @@ interface User {
   qrCode?: string;
   qrPublicUrl?: string | null;
   dateOfBirth?: string;
+  phone?: string;
   role: 'user' | 'admin' | 'hospital' | 'doctor';
   hospitalRoles?: string[];
   specialty?: string;

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
-import { Activity, Calendar, Users, LogOut } from "lucide-react";
+import { Activity, Calendar, Users, LogOut, ClipboardList, Pill, BedDouble, Bell } from "lucide-react";
 import Link from 'next/link';
 
 // Simple Doctor Sidebar Component
@@ -11,9 +11,29 @@ function DoctorSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const menu = [
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await fetch('/api/notifications?unread=true');
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadCount(data.unreadCount || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch unread count:', error);
+      }
+    };
+
+    fetchUnreadCount();
+  }, []);
+
+  const doctorNavItems = [
     { label: "Dashboard", href: "/doctor/dashboard", icon: Activity },
     { label: "Appointments", href: "/doctor/appointments", icon: Calendar },
+    { label: "Prescriptions", href: "/doctor/prescriptions", icon: Pill },
+    { label: "Rounds", href: "/doctor/rounds", icon: BedDouble },
     { label: "My Patients", href: "/doctor/patients", icon: Users },
   ];
 
@@ -27,15 +47,29 @@ function DoctorSidebar() {
 
   return (
     <div className="w-64 bg-slate-950 border-r border-slate-900 h-screen flex flex-col fixed left-0 top-0 z-40 hidden sm:flex">
-      <div className="p-6">
-        <h1 className="text-3xl font-playfair italic font-black text-[#02B69A] tracking-tighter">
-          yuktha<span className="inline-block w-[6px] h-[6px] bg-[#00D4AA] rounded-full ml-1 mb-[2px]"></span>
-        </h1>
-        <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Doctor Portal</p>
+      <div className="p-6 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-playfair italic font-black text-[#02B69A] tracking-tighter">
+            yuktha<span className="inline-block w-[6px] h-[6px] bg-[#00D4AA] rounded-full ml-1 mb-[2px]"></span>
+          </h1>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Doctor Portal</p>
+        </div>
+        
+        <button 
+          onClick={() => router.push('/doctor/dashboard')}
+          className="relative text-slate-400 hover:text-[#02B69A] transition-colors p-2"
+        >
+          <Bell className="w-5 h-5" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              {unreadCount}
+            </span>
+          )}
+        </button>
       </div>
 
       <div className="flex-1 px-4 space-y-2 mt-4">
-        {menu.map(item => {
+        {doctorNavItems.map(item => {
           const isActive = pathname === item.href;
           return (
             <Link
@@ -69,15 +103,16 @@ function DoctorSidebar() {
 function DoctorBottomNav() {
   const pathname = usePathname();
 
-  const menu = [
+  const doctorBottomNavItems = [
     { label: "Home", href: "/doctor/dashboard", icon: Activity },
     { label: "Visits", href: "/doctor/appointments", icon: Calendar },
     { label: "Patients", href: "/doctor/patients", icon: Users },
+    { label: "Rx", href: "/doctor/prescriptions", icon: Pill },
   ];
 
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-900 flex justify-around items-center h-20 z-50 pb-safe">
-      {menu.map(item => {
+      {doctorBottomNavItems.map(item => {
         const isActive = pathname === item.href;
         return (
           <Link

@@ -15,7 +15,12 @@ import {
     Building2,
     Mail,
     Phone,
-    UserPlus
+    UserPlus,
+    ChevronDown,
+    ChevronRight,
+    Key,
+    Ban,
+    CheckCircle2
 } from 'lucide-react';
 import {
     Dialog,
@@ -35,6 +40,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
+import { PLANS } from '@/lib/plans';
 
 interface HospitalData {
     _id: string;
@@ -43,6 +49,8 @@ interface HospitalData {
     roles: string[];
     status: 'Active' | 'Disabled';
     contactNumber: string;
+    plan: 'starter' | 'growth' | 'pro';
+    maxDoctors: number;
     createdAt: string;
 }
 
@@ -61,8 +69,17 @@ export default function AdminHospitalsPage() {
         password: '',
         roles: ['doctor'],
         contactNumber: '',
+        plan: 'starter' as 'starter' | 'growth' | 'pro',
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Expand state for doctor list
+    const [expandedHospital, setExpandedHospital] = useState<string | null>(null);
+    const [doctorsByHospital, setDoctorsByHospital] = useState<Record<string, any[]>>({});
+    const [loadingDoctors, setLoadingDoctors] = useState<string | null>(null);
+    const [resetPwDoctor, setResetPwDoctor] = useState<string | null>(null);
+    const [newPassword, setNewPassword] = useState('');
+    const [settingPw, setSettingPw] = useState(false);
 
     const fetchHospitals = async (showRefresh = false) => {
         if (showRefresh) setIsRefreshing(true);
@@ -109,32 +126,15 @@ export default function AdminHospitalsPage() {
             const data = await response.json();
 
             if (response.ok) {
-                toast({
-                    title: 'Success',
-                    description: 'Hospital added successfully',
-                });
+                toast({ title: 'Success', description: 'Hospital added successfully' });
                 setIsAddModalOpen(false);
-                setFormData({
-                    name: '',
-                    email: '',
-                    password: '',
-                    roles: ['doctor'],
-                    contactNumber: '',
-                });
+                setFormData({ name: '', email: '', password: '', roles: ['doctor'], contactNumber: '', plan: 'starter' });
                 fetchHospitals();
             } else {
-                toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: data.error || 'Failed to add hospital',
-                });
+                toast({ variant: 'destructive', title: 'Error', description: data.error || 'Failed to add hospital' });
             }
         } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Network error occurred',
-            });
+            toast({ variant: 'destructive', title: 'Error', description: 'Network error occurred' });
         } finally {
             setIsSubmitting(false);
         }
@@ -144,38 +144,89 @@ export default function AdminHospitalsPage() {
         if (!confirm('Are you sure you want to delete this hospital?')) return;
 
         try {
-            const response = await fetch(`/api/admin/hospitals/${id}`, {
-                method: 'DELETE',
-            });
-
+            const response = await fetch(`/api/admin/hospitals/${id}`, { method: 'DELETE' });
             if (response.ok) {
-                toast({
-                    title: 'Success',
-                    description: 'Hospital deleted successfully',
-                });
+                toast({ title: 'Success', description: 'Hospital deleted successfully' });
                 fetchHospitals();
             } else {
                 const data = await response.json();
-                toast({
-                    variant: 'destructive',
-                    title: 'Error',
-                    description: data.error || 'Failed to delete hospital',
-                });
+                toast({ variant: 'destructive', title: 'Error', description: data.error || 'Failed to delete hospital' });
             }
         } catch (error) {
-            toast({
-                variant: 'destructive',
-                title: 'Error',
-                description: 'Network error occurred',
+            toast({ variant: 'destructive', title: 'Error', description: 'Network error occurred' });
+        }
+    };
+
+    const handleToggleStatus = async (id: string, currentStatus: string) => {
+        const newStatus = currentStatus === 'Active' ? 'Disabled' : 'Active';
+        try {
+            const res = await fetch(`/api/admin/hospitals/${id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus })
             });
+            if (res.ok) {
+                toast({ title: `Hospital ${newStatus}` });
+                fetchHospitals();
+            } else {
+                toast({ variant: 'destructive', description: 'Failed to update status' });
+            }
+        } catch (error) {
+            toast({ variant: 'destructive', description: 'Network error' });
+        }
+    };
+
+    const handleExpandHospital = async (hospitalId: string) => {
+        if (expandedHospital === hospitalId) {
+            setExpandedHospital(null);
+            return;
+        }
+        setExpandedHospital(hospitalId);
+        if (!doctorsByHospital[hospitalId]) {
+            setLoadingDoctors(hospitalId);
+            try {
+                const res = await fetch(`/api/admin/hospitals/${hospitalId}/doctors`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setDoctorsByHospital(prev => ({ ...prev, [hospitalId]: data.doctors || [] }));
+                }
+            } catch (e) { console.error(e); }
+            finally { setLoadingDoctors(null); }
+        }
+    };
+
+    const handleResetPassword = async (doctorId: string) => {
+        if (!newPassword || newPassword.length < 6) {
+            toast({ variant: 'destructive', description: 'Password must be at least 6 characters.' });
+            return;
+        }
+        setSettingPw(true);
+        try {
+            const res = await fetch('/api/admin/doctors/set-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ doctorId, password: newPassword })
+            });
+            if (res.ok) {
+                toast({ title: 'Password Reset', description: 'Doctor password has been updated.' });
+                setResetPwDoctor(null);
+                setNewPassword('');
+            } else {
+                const data = await res.json();
+                toast({ variant: 'destructive', description: data.error || 'Failed to reset password' });
+            }
+        } catch (e) {
+            toast({ variant: 'destructive', description: 'Network error' });
+        } finally {
+            setSettingPw(false);
         }
     };
 
     const filteredHospitals = hospitals.filter(h =>
-        h.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        h.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (h.roles || []).some(r => r.toLowerCase().includes(searchQuery.toLowerCase()))
     );
+
+    const mrr = hospitals.reduce((sum, h) => sum + (PLANS[h.plan]?.price || 0), 0);
 
     return (
         <div className="space-y-6">
@@ -185,6 +236,11 @@ export default function AdminHospitalsPage() {
                     <p className="text-slate-500">Manage healthcare providers and partner accounts.</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
+                    <div className="hidden sm:flex items-center gap-2 bg-teal-50 border border-teal-200 rounded-xl px-4 py-2">
+                        <span className="text-xs font-bold text-teal-600 uppercase tracking-wider">MRR</span>
+                        <span className="text-lg font-bold text-teal-700">₹{mrr.toLocaleString('en-IN')}</span>
+                        <span className="text-xs text-teal-500">/mo</span>
+                    </div>
                     <Button
                         variant="outline"
                         size="icon"
@@ -211,34 +267,15 @@ export default function AdminHospitalsPage() {
                                 <div className="grid gap-4 py-4">
                                     <div className="grid gap-2">
                                         <Label htmlFor="name">Hospital Name</Label>
-                                        <Input
-                                            id="name"
-                                            placeholder="City Central Hospital"
-                                            required
-                                            value={formData.name}
-                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        />
+                                        <Input id="name" placeholder="City Central Hospital" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="email">Email / Login ID</Label>
-                                        <Input
-                                            id="email"
-                                            type="email"
-                                            placeholder="admin@hospital.com"
-                                            required
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        />
+                                        <Input id="email" type="email" placeholder="admin@hospital.com" required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="password">Temporary Password</Label>
-                                        <Input
-                                            id="password"
-                                            type="password"
-                                            required
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                        />
+                                        <Input id="password" type="password" required value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="role">Account Role</Label>
@@ -249,9 +286,7 @@ export default function AdminHospitalsPage() {
                                                 setFormData({ ...formData, roles: newRoles });
                                             }}
                                         >
-                                            <SelectTrigger id="role">
-                                                <SelectValue placeholder="Select type" />
-                                            </SelectTrigger>
+                                            <SelectTrigger id="role"><SelectValue placeholder="Select type" /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="doctor">Doctor / Hospital</SelectItem>
                                                 <SelectItem value="pharmacy">Pharmacy</SelectItem>
@@ -261,12 +296,23 @@ export default function AdminHospitalsPage() {
                                     </div>
                                     <div className="grid gap-2">
                                         <Label htmlFor="contact">Contact Number</Label>
-                                        <Input
-                                            id="contact"
-                                            placeholder="+91 00000 00000"
-                                            value={formData.contactNumber}
-                                            onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
-                                        />
+                                        <Input id="contact" placeholder="+91 00000 00000" value={formData.contactNumber} onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })} />
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="plan">Subscription Plan</Label>
+                                        <Select
+                                            value={formData.plan}
+                                            onValueChange={(v: string) => setFormData({ ...formData, plan: v as 'starter' | 'growth' | 'pro' })}
+                                        >
+                                            <SelectTrigger id="plan">
+                                                <SelectValue placeholder="Select plan" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="starter">Starter — ₹2,500/month (up to 3 doctors)</SelectItem>
+                                                <SelectItem value="growth">Growth — ₹5,000/month (up to 10 doctors)</SelectItem>
+                                                <SelectItem value="pro">Pro — ₹10,000/month (up to 25 doctors)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                 </div>
                                 <DialogFooter>
@@ -317,63 +363,215 @@ export default function AdminHospitalsPage() {
                             <table className="w-full text-left border-collapse">
                                 <thead>
                                     <tr className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-wider">
+                                        <th className="px-6 py-4 w-8"></th>
                                         <th className="px-6 py-4">Hospital / Partner</th>
                                         <th className="px-6 py-4">Type</th>
+                                        <th className="px-6 py-4">Plan</th>
+                                        <th className="px-6 py-4">Status</th>
                                         <th className="px-6 py-4">Contact Info</th>
                                         <th className="px-6 py-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {filteredHospitals.map((hospital) => (
-                                        <tr key={hospital._id} className="hover:bg-slate-50/50 transition-colors group">
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                                        <Hospital className="h-5 w-5" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-semibold text-slate-900">{hospital.name}</p>
-                                                        <p className="text-xs text-slate-400">ID: {hospital._id.substring(0, 8)}...</p>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex gap-1">
-                                                    {(hospital.roles || []).map(r => (
-                                                        <Badge key={r} variant="outline" className={
-                                                            r === 'doctor' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 capitalize' :
-                                                                'bg-emerald-50 text-emerald-700 border-emerald-100 capitalize'
-                                                        }>
-                                                            {r}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="space-y-1">
-                                                    <div className="flex items-center text-xs text-slate-600 gap-2">
-                                                        <Mail className="h-3 w-3" />
-                                                        {hospital.email}
-                                                    </div>
-                                                    {hospital.contactNumber && (
-                                                        <div className="flex items-center text-xs text-slate-600 gap-2">
-                                                            <Phone className="h-3 w-3" />
-                                                            {hospital.contactNumber}
-                                                        </div>
+                                        <>
+                                            <tr key={hospital._id}
+                                                className={`hover:bg-slate-50/50 transition-colors group cursor-pointer ${hospital.status === 'Disabled' ? 'opacity-60' : ''}`}
+                                                onClick={() => handleExpandHospital(hospital._id)}
+                                            >
+                                                <td className="px-4 py-4">
+                                                    {expandedHospital === hospital._id ? (
+                                                        <ChevronDown className="h-4 w-4 text-slate-400" />
+                                                    ) : (
+                                                        <ChevronRight className="h-4 w-4 text-slate-400" />
                                                     )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="text-slate-400 hover:text-red-600 hover:bg-red-50"
-                                                    onClick={() => handleDeleteHospital(hospital._id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </td>
-                                        </tr>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                                                            <Hospital className="h-5 w-5" />
+                                                        </div>
+                                                        <div>
+                                                            <p className="font-semibold text-slate-900">{hospital.name}</p>
+                                                            <p className="text-xs text-slate-400">ID: {hospital._id.substring(0, 8)}...</p>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <div className="flex gap-1">
+                                                        {(hospital.roles || []).map(r => (
+                                                            <Badge key={r} variant="outline" className={
+                                                                r === 'doctor' ? 'bg-indigo-50 text-indigo-700 border-indigo-100 capitalize' :
+                                                                    'bg-emerald-50 text-emerald-700 border-emerald-100 capitalize'
+                                                            }>
+                                                                {r}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    {(() => {
+                                                        const planStyles: Record<string, string> = {
+                                                            starter: 'bg-slate-100 text-slate-700 border-slate-200',
+                                                            growth: 'bg-teal-50 text-teal-700 border-teal-200',
+                                                            pro: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                                        };
+                                                        const planLabels: Record<string, string> = {
+                                                            starter: 'Starter · ₹2,500',
+                                                            growth: 'Growth · ₹5,000',
+                                                            pro: 'Pro · ₹10,000',
+                                                        };
+                                                        const p = hospital.plan || 'starter';
+                                                        return (
+                                                            <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${planStyles[p]}`}>
+                                                                {planLabels[p]}
+                                                            </span>
+                                                        );
+                                                    })()}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Badge className={hospital.status === 'Active'
+                                                        ? 'bg-green-50 text-green-700 border-green-100'
+                                                        : 'bg-red-50 text-red-700 border-red-100'
+                                                    }>
+                                                        {hospital.status || 'Active'}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
+                                                    <div className="space-y-1">
+                                                        <div className="flex items-center text-xs text-slate-600 gap-2">
+                                                            <Mail className="h-3 w-3" />
+                                                            {hospital.email}
+                                                        </div>
+                                                        {hospital.contactNumber && (
+                                                            <div className="flex items-center text-xs text-slate-600 gap-2">
+                                                                <Phone className="h-3 w-3" />
+                                                                {hospital.contactNumber}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 text-right" onClick={e => e.stopPropagation()}>
+                                                    <div className="flex gap-1 justify-end">
+                                                        <select
+                                                            className="text-xs border border-slate-200 rounded-lg px-2 py-1.5 bg-white text-slate-600 mr-2 cursor-pointer"
+                                                            value={hospital.plan || 'starter'}
+                                                            onChange={async (e) => {
+                                                                const newPlan = e.target.value;
+                                                                const res = await fetch(`/api/admin/hospitals/${hospital._id}`, {
+                                                                    method: 'PATCH',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ plan: newPlan }),
+                                                                });
+                                                                if (res.ok) {
+                                                                    toast({ title: 'Plan updated', description: `${hospital.name} moved to ${newPlan} plan.` });
+                                                                    fetchHospitals();
+                                                                } else {
+                                                                    toast({ variant: 'destructive', description: 'Failed to update plan' });
+                                                                }
+                                                            }}
+                                                        >
+                                                            <option value="starter">Starter</option>
+                                                            <option value="growth">Growth</option>
+                                                            <option value="pro">Pro</option>
+                                                        </select>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className={hospital.status === 'Active'
+                                                                ? 'text-amber-600 border-amber-200 hover:bg-amber-50 text-xs'
+                                                                : 'text-green-600 border-green-200 hover:bg-green-50 text-xs'
+                                                            }
+                                                            onClick={() => handleToggleStatus(hospital._id, hospital.status || 'Active')}
+                                                        >
+                                                            {hospital.status === 'Active' ? (
+                                                                <><Ban className="h-3 w-3 mr-1" /> Disable</>
+                                                            ) : (
+                                                                <><CheckCircle2 className="h-3 w-3 mr-1" /> Enable</>
+                                                            )}
+                                                        </Button>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="text-slate-400 hover:text-red-600 hover:bg-red-50"
+                                                            onClick={() => handleDeleteHospital(hospital._id)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+
+                                            {/* Expanded Doctor Row */}
+                                            {expandedHospital === hospital._id && (
+                                                <tr key={`${hospital._id}-expand`}>
+                                                    <td colSpan={6} className="p-0">
+                                                        <div className="bg-slate-50 border-l-2 border-blue-200 px-8 py-4">
+                                                            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Doctors under {hospital.name}</p>
+                                                            {loadingDoctors === hospital._id ? (
+                                                                <div className="flex items-center gap-2 py-4">
+                                                                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                                                                    <span className="text-sm text-slate-500">Loading doctors...</span>
+                                                                </div>
+                                                            ) : (doctorsByHospital[hospital._id] || []).length === 0 ? (
+                                                                <p className="text-sm text-slate-400 py-2">No doctors registered under this hospital.</p>
+                                                            ) : (
+                                                                <div className="space-y-2">
+                                                                    {(doctorsByHospital[hospital._id] || []).map((doc: any) => (
+                                                                        <div key={doc._id} className="bg-white border border-slate-200 rounded-lg p-3">
+                                                                            <div className="flex items-center justify-between">
+                                                                                <div>
+                                                                                    <p className="font-medium text-slate-900 text-sm">{doc.name}</p>
+                                                                                    <p className="text-xs text-slate-500">{doc.email} · {doc.specialty || 'General'}</p>
+                                                                                </div>
+                                                                                <Button
+                                                                                    variant="outline"
+                                                                                    size="sm"
+                                                                                    className="text-xs text-blue-600 border-blue-200 hover:bg-blue-50"
+                                                                                    onClick={() => {
+                                                                                        setResetPwDoctor(resetPwDoctor === doc._id ? null : doc._id);
+                                                                                        setNewPassword('');
+                                                                                    }}
+                                                                                >
+                                                                                    <Key className="h-3 w-3 mr-1" /> Reset Password
+                                                                                </Button>
+                                                                            </div>
+                                                                            {resetPwDoctor === doc._id && (
+                                                                                <div className="mt-3 flex gap-2 items-center">
+                                                                                    <Input
+                                                                                        type="password"
+                                                                                        placeholder="New password (min 6 chars)"
+                                                                                        className="max-w-xs text-sm"
+                                                                                        value={newPassword}
+                                                                                        onChange={e => setNewPassword(e.target.value)}
+                                                                                    />
+                                                                                    <Button
+                                                                                        size="sm"
+                                                                                        className="bg-blue-600 hover:bg-blue-700 text-xs"
+                                                                                        disabled={settingPw || newPassword.length < 6}
+                                                                                        onClick={() => handleResetPassword(doc._id)}
+                                                                                    >
+                                                                                        {settingPw ? <Loader2 className="h-3 w-3 animate-spin" /> : 'Set'}
+                                                                                    </Button>
+                                                                                    <Button
+                                                                                        variant="ghost"
+                                                                                        size="sm"
+                                                                                        onClick={() => setResetPwDoctor(null)}
+                                                                                        className="text-xs"
+                                                                                    >
+                                                                                        Cancel
+                                                                                    </Button>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </>
                                     ))}
                                 </tbody>
                             </table>

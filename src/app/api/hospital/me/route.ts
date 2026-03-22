@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
 import dbConnect from '@/lib/db';
 import Hospital from '@/models/Hospital';
+import { getPlanConfig } from '@/lib/plans';
 
 export async function GET(request: NextRequest) {
     try {
@@ -34,6 +35,11 @@ export async function GET(request: NextRequest) {
             name: hospital.name,
             email: hospital.email,
             roles: hospital.roles,
+            plan: hospital.plan || 'starter',
+            maxDoctors: hospital.maxDoctors || 3,
+            features: getPlanConfig(hospital.plan || 'starter').features,
+            planActivatedAt: hospital.planActivatedAt,
+            planExpiresAt: hospital.planExpiresAt,
         });
 
     } catch (error: any) {

@@ -14,19 +14,20 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Get pills for TODAY based on server time (UTC normalized to 00:00)
-        // In a real app, we might want to respect user timezone passed in headers
-        // For now, we assume matching Date objects set to midnight
+        // Calculate the start and end of "today" in the user's local timezone
+        const searchParams = request.nextUrl.searchParams;
+        const tzOffsetParam = searchParams.get('tzOffset');
+        const tzOffset = tzOffsetParam ? parseInt(tzOffsetParam) : 330; // Default to IST (330 mins)
 
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // Also fetch for tomorrow just in case of timezone overlap locally, 
-        // OR just strict Day matching. Let's do strict day matching on the Date object stored.
+        const offsetMs = tzOffset * 60 * 1000;
+        const nowUtc = Date.now();
+        // Calculate local midnight by taking UTC time + offset, flooring to day, then subtracting offset back
+        const localMidnight = new Date(Math.floor((nowUtc + offsetMs) / 86400000) * 86400000 - offsetMs);
+        const localEndOfDay = new Date(localMidnight.getTime() + 86400000 - 1);
 
         let pills = await PillTracking.find({
             patientId: user.userId,
-            date: today
+            date: { $gte: localMidnight, $lte: localEndOfDay }
         }).sort({ scheduledTime: 1 });
 
         // If no pills found for today, check for Medicine templates and generate them
@@ -49,7 +50,7 @@ export async function GET(request: NextRequest) {
                             medicineName: med.name,
                             dosage: med.dosage,
                             scheduledTime,
-                            date: today,
+                            date: localMidnight,
                             taken: false,
                             // Link to the medicine template
                             prescriptionId: med._id
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
                     // Re-fetch to get the new entries with IDs
                     pills = await PillTracking.find({
                         patientId: user.userId,
-                        date: today
+                        date: { $gte: localMidnight, $lte: localEndOfDay }
                     }).sort({ scheduledTime: 1 });
                 }
             }

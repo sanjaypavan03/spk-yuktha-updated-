@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from "@/lib/utils";
 
-export function MultilingualBrand() {
+function MultilingualBrand() {
     const [activeBrandIndex, setActiveBrandIndex] = useState(0);
     const brandTransliterations = [
         "yuktha", "युक्त", "যুক্ত", "যুক্ত", "యుక్త", "யுக்தா", "યુક્ત", "یکتھا",
@@ -50,9 +50,9 @@ export default function HospitalLogin() {
         setLoading(true);
 
         try {
-            // Use existing unified login which supports hospital role
-            const res = await fetch('/api/auth/login', {
-                method: 'POST', // Assuming unified auth handles hospital or we have /api/hospital/login
+            // Use the dedicated hospital login API
+            const res = await fetch('/api/hospital/login', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });

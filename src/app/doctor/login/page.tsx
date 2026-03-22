@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { cn } from "@/lib/utils";
 
-export function MultilingualBrand() {
+function MultilingualBrand() {
     const [activeBrandIndex, setActiveBrandIndex] = useState(0);
     const brandTransliterations = [
         "yuktha", "युक्त", "যুক্ত", "युक्त", "యుక్త", "யுக்தா", "યુક્ત", "یکتھا",

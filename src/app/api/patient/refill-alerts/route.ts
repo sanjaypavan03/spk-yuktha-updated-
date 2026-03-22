@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/db';
 import Prescription from '@/models/Prescription';
+import PillTracking from '@/models/PillTracking';
 import { getAuthenticatedUser } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
@@ -12,21 +13,43 @@ export async function GET(request: NextRequest) {
 
         await dbConnect();
 
-        // Let's assume there's a pill tracker or we calculate based on prescribedAmount - taken.
-        // For simplicity, returning mock data or data assuming `pillsRemaining` exists on Prescription.
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         const prescriptions = await Prescription.find({
             patientId: authUser.userId,
-            status: 'active'
+            status: 'Active'
         });
 
-        // Mock logic: Prescriptions with < 3 days remaining based on total quantity and frequency
-        const alerts = prescriptions.filter(p => {
-            // Simplified threshold check. In reality, requires tracking daily intake against total quantity.
-            // If we have `pillsRemaining` and `frequency` (e.g. 2 pills/day), threshold is 6 pills.
-            const pillsRemaining = (p as any).pillsRemaining || 5;
-            const frequencyNum = 2; // e.g. twice daily 
-            return pillsRemaining <= frequencyNum * 3;
-        });
+        const alerts = [];
+
+        for (const p of prescriptions) {
+            // Count PillTracking entries where date >= today and taken is false
+            const remainingCount = await PillTracking.countDocuments({
+                prescriptionId: p._id,
+                date: { $gte: today },
+                taken: false
+            });
+
+            // Parse frequency string: 'once'=1, 'twice'/'bd'=2, 'thrice'/'tds'=3, 'four'/'qid'=4, default=1
+            const freqLower = (p.frequency || '').toLowerCase();
+            let dailyFrequency = 1;
+            if (freqLower.includes('twice') || freqLower.includes('bd')) dailyFrequency = 2;
+            else if (freqLower.includes('thrice') || freqLower.includes('tds')) dailyFrequency = 3;
+            else if (freqLower.includes('four') || freqLower.includes('qid')) dailyFrequency = 4;
+
+            const daysRemaining = remainingCount / dailyFrequency;
+
+            if (daysRemaining <= 3) {
+                alerts.push({
+                    prescriptionId: p._id,
+                    medicineName: p.medicineName,
+                    dosage: p.dosage,
+                    daysRemaining,
+                    remainingCount
+                });
+            }
+        }
 
         return NextResponse.json({
             success: true,

@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Doctor from '@/models/Doctor';
 import Pharmacy from '@/models/Pharmacy';
 import { getAuthenticatedUser } from '@/lib/auth';
+import Hospital from '@/models/Hospital';
 
 // GET: List all staff (Doctors & Pharmacies) for the hospital
 export async function GET(request: NextRequest) {
@@ -32,6 +33,22 @@ export async function POST(request: NextRequest) {
         }
 
         await dbConnect();
+
+        // Check doctor limit for this plan
+        const hospitalDoc = await Hospital.findById(hospitalAuth.userId).select('plan maxDoctors name');
+        if (hospitalDoc) {
+            const currentDoctorCount = await Doctor.countDocuments({ hospitalId: hospitalAuth.userId });
+            const limit = hospitalDoc.maxDoctors || 3;
+            if (currentDoctorCount >= limit) {
+                return NextResponse.json({
+                    error: 'Doctor limit reached',
+                    message: `Your ${hospitalDoc.plan || 'starter'} plan allows up to ${limit} doctors. Please contact your Yuktha admin to upgrade.`,
+                    currentCount: currentDoctorCount,
+                    limit,
+                }, { status: 403 });
+            }
+        }
+
         const { type, name, email, specialty, location } = await request.json();
 
         if (type === 'Doctor') {

@@ -4,6 +4,7 @@ import dbConnect from '@/lib/db';
 import Hospital from '@/models/Hospital';
 import { getAuthenticatedUser } from '@/lib/auth';
 import bcrypt from 'bcrypt';
+import { getPlanConfig, PlanKey } from '@/lib/plans';
 
 // GET: List all hospitals
 export async function GET(request: NextRequest) {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
         }
 
         await dbConnect();
-        const { name, email, password, role, roles, contactNumber } = await request.json();
+        const { name, email, password, role, roles, contactNumber, plan } = await request.json();
 
         if (!name || !email || !password || (!role && !roles)) {
             return NextResponse.json({ error: 'Missing field: Name, Email, Password, and Role are required' }, { status: 400 });
@@ -49,6 +50,9 @@ export async function POST(request: NextRequest) {
         if (!roles && role) {
             finalRoles = role === 'Both' ? ['doctor', 'pharmacy'] : [role.toLowerCase()];
         }
+
+        const finalPlan = (plan || 'starter') as PlanKey;
+        const planConfig = getPlanConfig(finalPlan);
 
         // Check for existing hospital
         const existing = await Hospital.findOne({ email: normalizedEmail });
@@ -73,6 +77,9 @@ export async function POST(request: NextRequest) {
             roles: finalRoles,
             contactNumber,
             status: 'Active',
+            plan: finalPlan,
+            maxDoctors: planConfig.maxDoctors,
+            planActivatedAt: new Date(),
         });
 
         await hospital.save();
@@ -85,6 +92,8 @@ export async function POST(request: NextRequest) {
                 email: hospital.email,
                 roles: hospital.roles,
                 status: hospital.status,
+                plan: hospital.plan,
+                maxDoctors: hospital.maxDoctors,
             }
         }, { status: 201 });
 
