@@ -85,6 +85,22 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next();
     }
 
+    // Receptionist Application Protection (Strict)
+    if (pathname.startsWith('/receptionist')) {
+        const token = extractToken(request);
+
+        if (!token) {
+            return NextResponse.redirect(new URL('/hospital/login', request.url));
+        }
+
+        const payload = await verifyToken(token);
+        if (!payload || payload.role !== 'receptionist') {
+            return NextResponse.redirect(new URL('/hospital/login', request.url));
+        }
+
+        return NextResponse.next();
+    }
+
     // Patient Application Protection (Strict)
     if (pathname.startsWith('/dashboard')) {
         const token = extractToken(request);
@@ -110,6 +126,7 @@ export const config = {
         '/api/:path*',
         '/dashboard/:path*',
         '/doctor/:path*',
-        '/hospital/:path*'
+        '/hospital/:path*',
+        '/receptionist/:path*'
     ],
 };

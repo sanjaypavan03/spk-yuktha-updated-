@@ -33,8 +33,18 @@ export async function POST(request: NextRequest) {
         const authUser = await getAuthenticatedUser(request);
         if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        if (authUser.role === 'hospital') {
-            const vaultGate = planGate(authUser.hospitalPlan, 'vault');
+        if (authUser.role === 'hospital' || authUser.role === 'receptionist') {
+            // Determine the hospital's plan:
+            // - For 'hospital' role: plan is in JWT (authUser.hospitalPlan)
+            // - For 'receptionist' role: plan must be looked up via hospitalId
+            let planToCheck = authUser.hospitalPlan;
+            if (authUser.role === 'receptionist' && authUser.hospitalId) {
+                await dbConnect();
+                const Hospital = (await import('@/models/Hospital')).default;
+                const hosp = await Hospital.findById(authUser.hospitalId).select('plan');
+                planToCheck = hosp?.plan;
+            }
+            const vaultGate = planGate(planToCheck, 'vault');
             if (vaultGate) return vaultGate;
         }
 
@@ -43,7 +53,7 @@ export async function POST(request: NextRequest) {
 
         // If hospital is uploading for a patient, use the provided userId
         let targetUserId = authUser.userId;
-        if (authUser.role === 'hospital' && body.userId) {
+        if ((authUser.role === 'hospital' || authUser.role === 'receptionist') && body.userId) {
             targetUserId = body.userId;
         }
 

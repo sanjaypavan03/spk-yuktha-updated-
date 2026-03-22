@@ -18,10 +18,11 @@ const secret = new TextEncoder().encode(JWT_SECRET);
 export interface JWTPayload {
   userId: string;
   email: string;
-  role: 'user' | 'admin' | 'hospital' | 'doctor';
+  role: 'user' | 'admin' | 'hospital' | 'doctor' | 'receptionist';
   name?: string;
   hospitalRoles?: string[];
   hospitalPlan?: 'starter' | 'growth' | 'pro';
+  hospitalId?: string;
   iat?: number;
   exp?: number;
 }
@@ -32,10 +33,11 @@ export interface JWTPayload {
 export async function generateToken(
   userId: string,
   email: string,
-  role: 'user' | 'admin' | 'hospital' | 'doctor' = 'user',
+  role: 'user' | 'admin' | 'hospital' | 'doctor' | 'receptionist' = 'user',
   name?: string,
   hospitalRoles?: string[],
-  hospitalPlan?: string
+  hospitalPlan?: string,
+  hospitalId?: string
 ): Promise<string> {
   const payload: any = { userId, email, role };
   if (name) payload.name = name;
@@ -52,6 +54,10 @@ export async function generateToken(
 
   if (hospitalPlan) {
     payload.hospitalPlan = hospitalPlan;
+  }
+
+  if (hospitalId) {
+    payload.hospitalId = hospitalId;
   }
 
   return await new SignJWT(payload)
@@ -95,10 +101,11 @@ export function extractToken(request: NextRequest): string | null {
 export interface AuthenticatedUser {
   userId: string;
   email: string;
-  role: 'user' | 'admin' | 'hospital' | 'doctor';
+  role: 'user' | 'admin' | 'hospital' | 'doctor' | 'receptionist';
   name?: string;
   hospitalRoles?: string[];
   hospitalPlan?: string;
+  hospitalId?: string;
 }
 
 /**
@@ -123,9 +130,10 @@ export async function getAuthenticatedUser(request: NextRequest): Promise<Authen
     userId: payload.userId,
     email: payload.email,
     name: payload.name,
-    role: payload.role || 'user', // Default to user for backward compatibility
+    role: (payload.role as any) || 'user', // Default to user for backward compatibility
     hospitalRoles: payload.hospitalRoles,
     hospitalPlan: payload.hospitalPlan,
+    hospitalId: payload.hospitalId,
   };
 }
 
