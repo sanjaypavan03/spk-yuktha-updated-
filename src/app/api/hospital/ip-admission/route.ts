@@ -4,6 +4,7 @@ import IPAdmission from '@/models/IPAdmission';
 import User from '@/models/User';
 import Doctor from '@/models/Doctor';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { planGate } from '@/lib/plan-gate';
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,6 +14,9 @@ export async function POST(request: NextRequest) {
         if (!authUser || authUser.role !== 'hospital') {
             return NextResponse.json({ error: 'Unauthorized: Hospital access required' }, { status: 401 });
         }
+
+        const ipGate = planGate(authUser.hospitalPlan, 'ipAdmissions');
+        if (ipGate) return ipGate;
 
         const body = await request.json();
         const { patientId, doctorId, ward, bedNumber, admissionReason, admissionDate } = body;

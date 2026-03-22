@@ -159,7 +159,7 @@ export async function DELETE(
     const currentUserIdStr = authUser.userId.toString();
 
     if (medicineOwnerIdStr !== currentUserIdStr) {
-      console.log(`❌ Delete failed: Ownership mismatch. Owner: ${medicineOwnerId}, Requester: ${currentUserId}`);
+      console.log(`❌ Delete failed: Ownership mismatch. Owner: ${medicineOwnerIdStr}, Requester: ${currentUserIdStr}`);
       return NextResponse.json(
         { error: 'Forbidden: You do not have permission to delete this medication' },
         { status: 403 }

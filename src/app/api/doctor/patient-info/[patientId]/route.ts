@@ -6,7 +6,7 @@ import { getAuthenticatedUser } from '@/lib/auth';
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { patientId: string } }
+    { params }: { params: Promise<{ patientId: string }> }
 ) {
     try {
         const authUser = await getAuthenticatedUser(request);
@@ -14,7 +14,7 @@ export async function GET(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const { patientId } = params;
+        const { patientId } = await params;
         if (!patientId) {
             return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
         }

@@ -3,6 +3,7 @@ import dbConnect from '@/lib/db';
 import Prescription from '@/models/Prescription';
 import Appointment from '@/models/Appointment';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { planGate } from '@/lib/plan-gate';
 import { format, subDays } from 'date-fns';
 
 export async function GET(request: NextRequest) {
@@ -11,6 +12,9 @@ export async function GET(request: NextRequest) {
         if (!authUser || authUser.role !== 'hospital') {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+
+        const analyticsGate = planGate(authUser.hospitalPlan, 'performanceReports');
+        if (analyticsGate) return analyticsGate;
 
         await dbConnect();
         const hospitalId = authUser.userId;

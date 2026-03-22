@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuthenticatedUser } from '@/lib/auth';
+import { planGate } from '@/lib/plan-gate';
 import dbConnect from '@/lib/db';
 import { getReportModel } from '@/models/Report';
 import Appointment from '@/models/Appointment';
@@ -31,6 +32,11 @@ export async function POST(request: NextRequest) {
     try {
         const authUser = await getAuthenticatedUser(request);
         if (!authUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        if (authUser.role === 'hospital') {
+            const vaultGate = planGate(authUser.hospitalPlan, 'vault');
+            if (vaultGate) return vaultGate;
+        }
 
         const body = await request.json();
         const Report = await getReportModel();
