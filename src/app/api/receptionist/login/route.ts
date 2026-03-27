@@ -51,13 +51,16 @@ export async function POST(request: NextRequest) {
         await receptionistAuth.save();
 
         // Generate token
+        const Hospital = (await import('@/models/Hospital')).default;
+        const hospital = await Hospital.findById(receptionist.hospitalId).select('plan');
+
         const token = await generateToken(
             receptionist._id.toString(),
             receptionist.email,
             'receptionist',
             receptionist.name,
             undefined,       // hospitalRoles
-            undefined,       // hospitalPlan  
+            hospital?.plan || 'starter',       // hospitalPlan  
             receptionist.hospitalId.toString()  // hospitalId
         );
 

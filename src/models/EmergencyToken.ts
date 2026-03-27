@@ -1,44 +1,28 @@
-/**
- * Emergency Token Model
- * Stores emergency QR tokens linked to users
- */
+import mongoose, { Schema } from 'mongoose'
 
-import mongoose, { Schema, Document, Types } from 'mongoose';
-
-export interface IEmergencyToken extends Document {
-  token: string; // Unique UUID token
-  userId: Types.ObjectId; // Reference to User
-  isActive: boolean; // Whether token is active
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const emergencyTokenSchema = new Schema<IEmergencyToken>(
-  {
+const EmergencyTokenSchema = new Schema({
+    patientId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+        index: true,
+    },
     token: {
-      type: String,
-      required: [true, 'Token is required'],
-      unique: true,
-      index: true,
+        type: String,
+        required: true,
+        unique: true,
+        index: true,
     },
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: [true, 'User ID is required'],
-      index: true,
+    tier: {
+        type: Number,
+        enum: [1, 2],
+        default: 1,       // ← FIX: was missing entirely
+        required: true,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
+    createdAt: {
+        type: Date,
+        default: Date.now,
     },
-  },
-  {
-    timestamps: true,
-  }
-);
+})
 
-// Compound index for fast lookups
-emergencyTokenSchema.index({ token: 1, isActive: 1 });
-emergencyTokenSchema.index({ userId: 1, isActive: 1 });
-
-export default mongoose.models.EmergencyToken || mongoose.model<IEmergencyToken>('EmergencyToken', emergencyTokenSchema);
+export default mongoose.models.EmergencyToken || mongoose.model('EmergencyToken', EmergencyTokenSchema)

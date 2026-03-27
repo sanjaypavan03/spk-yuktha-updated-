@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
 
         console.log('📝 Request Body:', JSON.stringify(body, null, 2));
 
-        const { userId, name, dosage, time, instructions, route } = body;
+        const { userId, name, dosage, time, instructions, route, duration } = body;
 
         // Map frontend fields (medForm) to schema fields
         // Frontend: userId, name, dosage, time, instructions, route
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
             frequency: time, // mapped from 'time'
             instructions: instructions || '',
             route: route || 'Oral',
+            duration: duration || 7, // Default to 7 if not provided
             creatorEmail: authUser.email
         };
 
@@ -98,45 +99,49 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Prescription Saved! ID:', newPrescription._id);
 
-        // 5. Generate Pill Tracking Schedule (7 Days)
+        // 5. Generate Pill Tracking Schedule
         try {
-            const frequency = prescriptionData.frequency.toLowerCase();
-            let timeSlots = ["09:00 AM"]; // Default
+            const frequencyMap: Record<string, string[]> = {
+                OD: ['08:00'],
+                BD: ['08:00', '20:00'],
+                TDS: ['08:00', '14:00', '20:00'],
+                QID: ['07:00', '12:00', '17:00', '21:00'],
+            };
 
-            if (frequency.includes('twice') || frequency.includes('bd') || frequency.includes('bid') || frequency.includes('2 times')) {
-                timeSlots = ["09:00 AM", "09:00 PM"];
-            } else if (frequency.includes('thrice') || frequency.includes('tds') || frequency.includes('tid') || frequency.includes('3 times')) {
-                timeSlots = ["09:00 AM", "02:00 PM", "09:00 PM"];
-            } else if (frequency.includes('four') || frequency.includes('qid') || frequency.includes('4 times')) {
-                timeSlots = ["09:00 AM", "01:00 PM", "05:00 PM", "09:00 PM"];
-            }
+            const normalizedFreq = (prescriptionData.frequency || '').toUpperCase();
+            const timeSlots = frequencyMap[normalizedFreq] || ['08:00'];
+            const days = prescriptionData.duration || 7;
 
             const pillEntries: any[] = [];
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+            
+            // Get "today" in IST correctly
+            const now = new Date();
+            const istOffset = 330 * 60 * 1000; // 330 minutes in ms
+            const istNow = new Date(now.getTime() + istOffset);
+            
+            for (let day = 0; day < days; day++) {
+                const date = new Date(istNow);
+                date.setDate(date.getDate() + day);
+                const dateStr = date.toISOString().split('T')[0];
 
-            // Generate for 7 days
-            for (let i = 0; i < 7; i++) {
-                const currentDate = new Date(today);
-                currentDate.setDate(today.getDate() + i);
-
-                timeSlots.forEach(time => {
+                for (const timeSlot of timeSlots) {
                     pillEntries.push({
                         patientId: userId,
                         prescriptionId: newPrescription._id,
                         medicineName: prescriptionData.medicineName,
                         dosage: prescriptionData.dosage,
-                        scheduledTime: time,
-                        date: currentDate,
-                        taken: false
+                        scheduledTime: timeSlot,
+                        date: dateStr,
+                        status: 'pending',
+                        tzOffset: 330,
                     });
-                });
+                }
             }
 
             // Lazy import to avoid circular dependency issues if any
             const PillTracking = (await import('@/models/PillTracking')).default;
             await PillTracking.insertMany(pillEntries);
-            console.log(`✅ Generated ${pillEntries.length} pill tracking entries for 7 days`);
+            console.log(`✅ Generated ${pillEntries.length} pill tracking entries for ${days} days (tzOffset: 330)`);
 
         } catch (genError) {
             console.error('⚠️ Failed to generate pill tracking entries:', genError);

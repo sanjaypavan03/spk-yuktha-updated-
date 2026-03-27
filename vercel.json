@@ -1,0 +1,34 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "admin.yuktha.health"
+        }
+      ],
+      "destination": "/admin-entry"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "doctor.yuktha.health"
+        }
+      ],
+      "destination": "/doctor-entry"
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "hospital.yuktha.health"
+        }
+      ],
+      "destination": "/hospital-entry"
+    }
+  ]
+}

@@ -30,6 +30,7 @@ import { format } from 'date-fns';
 import { SecretVaultModal } from "@/components/dashboard/secret-vault-modal";
 import { cn } from "@/lib/utils";
 import { PremiumSelect } from '@/components/ui/premium-select';
+import { PremiumDatePicker } from '@/components/ui/premium-date-picker';
 
 const reportTypes = [
   { id: 'blood', label: 'Blood Test' },
@@ -293,18 +294,11 @@ export default function ReportsPage() {
                                     ]}
                                     icon={Activity}
                                 />
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Date</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                                        <input 
-                                            type="date" 
-                                            value={reportDate}
-                                            onChange={(e) => setReportDate(e.target.value)}
-                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
-                                        />
-                                    </div>
-                                </div>
+                                <PremiumDatePicker
+                                    label="Report Date"
+                                    value={reportDate}
+                                    onChange={setReportDate}
+                                />
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Hospital / Clinic</label>
                                     <div className="relative">
@@ -418,18 +412,11 @@ export default function ReportsPage() {
                                     ]}
                                     icon={Activity}
                                 />
-                                <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Report Date</label>
-                                    <div className="relative">
-                                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                                        <input 
-                                            type="date" 
-                                            value={reportDate}
-                                            onChange={(e) => setReportDate(e.target.value)}
-                                            className="w-full pl-11 pr-4 h-[56px] bg-slate-50 border border-slate-100 rounded-2xl text-slate-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-100 transition-all font-medium text-xs sm:text-sm"
-                                        />
-                                    </div>
-                                </div>
+                                <PremiumDatePicker
+                                    label="Report Date"
+                                    value={reportDate}
+                                    onChange={setReportDate}
+                                />
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Hospital / Clinic</label>
                                     <div className="relative">

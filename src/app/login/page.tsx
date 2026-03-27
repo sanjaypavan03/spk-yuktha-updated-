@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { useToast } from '@/hooks/use-toast';
@@ -9,8 +9,8 @@ import { cn } from "@/lib/utils";
 function MultilingualBrand() {
     const [activeBrandIndex, setActiveBrandIndex] = useState(0);
     const brandTransliterations = [
-        "yuktha", "युक्त", "যুক্ত", "युक्त", "యుక్త", "யுக்தா", "યુક્ત", "یکتھا",
-        "ಯುಕ್ತ", "ଯୁକ୍ત", "യുಕ್ತ", "ਯੁਕਤ", "যুক্ত", "युक्त", "ᱭᱩᱠᱛᱷᱟ", "یکতھا",
+        "yuktha", "युक्त", "যুক্ত", "युक्त", "యుక్త", "யுக்தా", "યુક્ત", "ગુજરાતી",
+        "ಯುಕ್ತ", "ଯୁକ୍ତ", "യുക്ത", "ਯੁਕਤ", "যুক্ত", "युक्त", "ᱭᱩᱠᱛᱷᱟ", "یکতھا",
         "युक्त", "يوڪٿا", "युक्त", "युक्त", "য়ুক্তা", "युक्त", "युक्त"
     ];
 
@@ -41,7 +41,7 @@ function MultilingualBrand() {
     );
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const { login, signup, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -221,5 +221,17 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0F2027] flex items-center justify-center">
+        <div className="text-[#02B69A] font-bold animate-pulse">Loading...</div>
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }

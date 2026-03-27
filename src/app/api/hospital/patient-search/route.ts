@@ -12,16 +12,25 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const hospitalId = authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId;
+
+        if (!hospitalId) {
+            return NextResponse.json({ error: 'Hospital ID not found in session' }, { status: 400 });
+        }
+
         const { searchParams } = new URL(request.url);
         const q = searchParams.get('q');
         const phone = searchParams.get('phone');
 
         if (phone) {
-            const patient = await User.findOne({ phone: phone.trim() })
+            const patient = await User.findOne({ 
+                phone: phone.trim(),
+                hospitalId: hospitalId 
+            })
                 .select('_id name firstName lastName email phone dateOfBirth qrCode bloodGroup');
             
             if (!patient) {
-                return NextResponse.json({ error: 'Patient not found' }, { status: 404 });
+                return NextResponse.json({ error: 'Patient not found or belongs to another hospital' }, { status: 404 });
             }
 
             return NextResponse.json({ success: true, patient });
@@ -32,6 +41,7 @@ export async function GET(request: NextRequest) {
         }
 
         const patients = await User.find({
+            hospitalId: hospitalId,
             $or: [
                 { phone: { $regex: q, $options: 'i' } },
                 { name: { $regex: q, $options: 'i' } },

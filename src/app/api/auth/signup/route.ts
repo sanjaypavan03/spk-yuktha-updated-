@@ -11,6 +11,7 @@ import MedicalInfo from '@/models/MedicalInfo';
 import { generateToken, setAuthCookie } from '@/lib/auth';
 import { generateQRCode, getQRPublicUrl } from '@/lib/qr';
 import bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,8 +63,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique QR code
+    // Generate unique QR code and emergency token
     const qrCode = generateQRCode();
+    const emergencyToken = uuidv4();
 
     // Split name into firstName and lastName if not provided
     const nameParts = name.trim().split(' ');
@@ -100,6 +102,7 @@ export async function POST(request: NextRequest) {
         firstName: finalFirstName,
         lastName: finalLastName,
         qrCode,
+        emergencyToken,
         emergencyDetailsCompleted: false,
       });
       console.log('✅ User.create() succeeded');
@@ -140,16 +143,24 @@ export async function POST(request: NextRequest) {
     }
 
     // Create empty medical info record for this user
-    console.log('💾 Creating medical info record...');
+    console.log('💾 Creating medical info record and emergency token entry...');
     try {
+      const MedicalInfo = (await import('@/models/MedicalInfo')).default;
+      const EmergencyToken = (await import('@/models/EmergencyToken')).default;
+
       await MedicalInfo.create({
         userId: user._id,
       });
-      console.log('✅ Medical info created successfully');
+
+      await EmergencyToken.create({
+        userId: user._id,
+        token: emergencyToken,
+        isActive: true,
+        tier: 1 // Default to Tier 1
+      });
+      console.log('✅ Medical info and Emergency token created successfully');
     } catch (medicalError: any) {
-      console.error('❌ MedicalInfo.create() failed:', medicalError);
-      console.error('❌ Medical error message:', medicalError.message);
-      // Don't fail signup if medical info creation fails, just log it
+      console.error('❌ MedicalInfo/EmergencyToken.create() failed:', medicalError);
     }
 
     // Generate JWT token

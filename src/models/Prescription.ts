@@ -10,6 +10,7 @@ export interface IPrescription extends Document {
     frequency: string;
     route: string;
     instructions: string;
+    duration: number; // in days
     status: 'Active' | 'Completed' | 'Cancelled';
     issuedAt: Date;
     dispensedAt?: Date;
@@ -58,6 +59,10 @@ const prescriptionSchema = new Schema<IPrescription>(
         instructions: {
             type: String,
             trim: true,
+        },
+        duration: {
+            type: Number,
+            default: 7,
         },
         status: {
             type: String,

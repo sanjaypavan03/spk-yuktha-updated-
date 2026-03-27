@@ -19,12 +19,51 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'QR Token is required' }, { status: 400 });
         }
 
-        // The user's QR code itself is saved as a token on the User model
-        const user = await User.findOne({ qrCode: token });
+        // Use EmergencyToken model to verify the QR code
+        const EmergencyToken = (await import('@/models/EmergencyToken')).default;
+        const emergencyToken = await EmergencyToken.findOne({ token, isActive: true });
 
-        if (!user) {
-            return NextResponse.json({ error: 'Invalid QR Code or User not found' }, { status: 404 });
+        if (!emergencyToken) {
+            // Log failed scan attempt
+            try {
+                const QRScanLog = (await import('@/models/QRScanLog')).default;
+                await QRScanLog.create({
+                    scannedBy: authUser.userId,
+                    scannerRole: authUser.role,
+                    hospitalId: authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId,
+                    patientId: null,
+                    token,
+                    tier: 2,
+                    ipAddress: request.headers.get('x-forwarded-for') || '',
+                    userAgent: request.headers.get('user-agent') || '',
+                    accessGranted: false,
+                    failReason: 'token_not_found',
+                });
+            } catch (logError) {
+                console.error('Failed to log failed scan attempt:', logError);
+            }
+            return NextResponse.json({ error: 'Invalid or expired QR Code' }, { status: 404 });
         }
+
+        // Log successful scan
+        try {
+            const QRScanLog = (await import('@/models/QRScanLog')).default;
+            await QRScanLog.create({
+                scannedBy: authUser.userId,
+                scannerRole: authUser.role,
+                hospitalId: authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId,
+                patientId: emergencyToken.patientId,
+                token,
+                tier: 2,
+                ipAddress: request.headers.get('x-forwarded-for') || '',
+                userAgent: request.headers.get('user-agent') || '',
+                accessGranted: true,
+            });
+        } catch (logError) {
+            console.error('Failed to log successful scan attempt:', logError);
+        }
+
+        const user = await User.findById(emergencyToken.patientId);
 
         // Fetch Medical Info
         const medicalInfo = await MedicalInfo.findOne({ userId: user._id });

@@ -6,6 +6,7 @@ import {
   Upload, Search, User, X, FileText, CheckCircle2, Loader2, File
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { PremiumDatePicker } from "@/components/ui/premium-date-picker";
 
 const CATEGORIES = [
   'Blood Report', 'Scan & Imaging', 'Prescription', 'Pathology',
@@ -237,10 +238,12 @@ export default function ReceptionistUploadReportPage() {
                 <label className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5 block">Report Title</label>
                 <input className={inputClass} value={title} onChange={e => setTitle(e.target.value)} />
               </div>
-              <div>
-                <label className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5 block">Date of Report</label>
-                <input type="date" className={inputClass} value={reportDate} onChange={e => setReportDate(e.target.value)} />
-              </div>
+              <PremiumDatePicker
+                label="Date of Report"
+                value={reportDate}
+                onChange={setReportDate}
+                className="w-full"
+              />
               <div>
                 <label className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-1.5 block">Clinic / Lab</label>
                 <input className={inputClass} value={clinicName} onChange={e => setClinicName(e.target.value)} />

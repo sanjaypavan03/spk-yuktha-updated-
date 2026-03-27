@@ -10,6 +10,7 @@ export interface IPillTracking extends Document {
     taken: boolean;
     takenAt?: Date;
     skipped?: boolean;
+    tzOffset: number; // e.g. 330 for IST
 }
 
 const pillTrackingSchema = new Schema<IPillTracking>(
@@ -23,6 +24,7 @@ const pillTrackingSchema = new Schema<IPillTracking>(
         taken: { type: Boolean, default: false },
         takenAt: { type: Date },
         skipped: { type: Boolean, default: false },
+        tzOffset: { type: Number, default: 330 },
     },
     { timestamps: true }
 );

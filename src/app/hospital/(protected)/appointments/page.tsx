@@ -9,7 +9,7 @@ import {
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import "react-day-picker/style.css";
+import "react-day-picker/dist/style.css";
 
 export default function HospitalAppointmentsPage() {
   const { toast } = useToast();

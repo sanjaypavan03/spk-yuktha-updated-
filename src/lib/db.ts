@@ -36,9 +36,15 @@ async function dbConnect(): Promise<typeof mongoose> {
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000,
+      socketTimeoutMS: 45000,
+      family: 4, // Use IPv4, skip trying IPv6
+      tlsAllowInvalidCertificates: true,
     };
 
     cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+      console.log('✅ MongoDB Connected successfully to:', MONGODB_URI?.split('@')[1]);
       return mongoose;
     });
   }

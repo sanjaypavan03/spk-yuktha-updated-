@@ -10,6 +10,8 @@ export interface IUser extends Document {
   phone?: string;
   dateOfBirth?: Date;
   qrCode?: string;
+  hospitalId?: Types.ObjectId; // which hospital registered them
+  emergencyToken?: string; // UUID for public emergency access
   emergencyDetailsCompleted: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -56,6 +58,17 @@ const userSchema = new Schema<IUser>(
       type: String,
       unique: true,
       sparse: true,
+    },
+    hospitalId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Hospital',
+      default: null,
+    },
+    emergencyToken: {
+      type: String,
+      unique: true,
+      sparse: true,
+      index: true,
     },
     emergencyDetailsCompleted: {
       type: Boolean,

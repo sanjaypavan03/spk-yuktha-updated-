@@ -43,6 +43,24 @@ export async function GET(
       );
     }
 
+    // ── LOG THE SCAN ──
+    try {
+      const QRScanLog = (await import('@/models/QRScanLog')).default;
+      await QRScanLog.create({
+        scannedBy: 'public',
+        scannerRole: 'anonymous',
+        hospitalId: null,
+        patientId: emergencyToken.patientId,
+        token,
+        tier: 1,
+        ipAddress: request.headers.get('x-forwarded-for') || (request as any).ip || 'unknown',
+        userAgent: request.headers.get('user-agent') || 'unknown',
+        accessGranted: true,
+      });
+    } catch (logError) {
+      console.error('Failed to log emergency scan:', logError);
+    }
+
     const user = await User.findById(emergencyToken.userId);
     if (!user) {
       return NextResponse.json(
