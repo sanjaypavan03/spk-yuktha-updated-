@@ -51,7 +51,18 @@ export async function POST(request: NextRequest) {
         await doctorAuth.save();
 
         // Generate token
-        const token = await generateToken(doctor._id.toString(), doctor.email, 'doctor');
+        const Hospital = (await import('@/models/Hospital')).default;
+        const hospital = await Hospital.findById(doctor.hospitalId).select('plan');
+
+        const token = await generateToken(
+            doctor._id.toString(), 
+            doctor.email, 
+            'doctor',
+            doctor.name,
+            undefined, // hospitalRoles
+            hospital?.plan || 'starter',
+            doctor.hospitalId.toString()
+        );
 
         // Create response
         const response = NextResponse.json({
@@ -60,7 +71,8 @@ export async function POST(request: NextRequest) {
                 id: doctor._id,
                 email: doctor.email,
                 name: doctor.name,
-                role: 'doctor'
+                role: 'doctor',
+                hospitalId: doctor.hospitalId
             }
         });
 

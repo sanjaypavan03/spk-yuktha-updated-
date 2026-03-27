@@ -11,13 +11,24 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Fetch prescriptions issued by this doctor
-        // Using authUser.userId which matches doctorId in Prescription model
-        const prescriptions = await Prescription.find({ 
-            doctorId: authUser.userId 
-        })
-        .populate('patientId', 'name email phone firstName lastName')
-        .sort({ issuedAt: -1 });
+        const { searchParams } = new URL(request.url);
+        const patientId = searchParams.get('patientId');
+
+        if (!patientId) {
+            return NextResponse.json({ error: 'Patient ID is required' }, { status: 400 });
+        }
+
+        const hospitalId = authUser.hospitalId;
+        if (!hospitalId) {
+            return NextResponse.json({ error: 'Hospital context not found' }, { status: 400 });
+        }
+
+        // Fetch all prescriptions for this patient by this hospital
+        // Verified by hospitalId from JWT
+        const prescriptions = await Prescription.find({
+            patientId,
+            hospitalId: authUser.hospitalId
+        }).sort({ issuedAt: -1 });
 
         return NextResponse.json({ success: true, prescriptions });
     } catch (error) {

@@ -14,6 +14,11 @@ const MedicalInfoSchema = new Schema({
         unique: true,
         index: true,
     },
+    hospitalId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Hospital',
+        index: true,
+    },
     // ── Tier 1 — Public QR (no auth needed) ──
     bloodGroup: { type: String, default: '' },
     allergies: [{ type: String }],
@@ -28,10 +33,13 @@ const MedicalInfoSchema = new Schema({
     primaryDoctorName: { type: String, default: '' },
 
     // ── Clinical readings (doctor-entered) ──
-    bloodPressure: { type: String, default: '' },
-    bloodSugar: { type: String, default: '' },
+    bpReading: { type: String, default: '' },
+    fastingBloodSugar: { type: String, default: '' },
+    bmi: { type: String, default: '' },
+    conditionControlLevel: { type: String, default: '' },
     weight: { type: String, default: '' },
     height: { type: String, default: '' },
+    lastClinicalVisitDate: { type: Date },
 
     // ── Emergency PIN — Tier 2 PIN access for non-Yuktha hospitals ──
     emergencyPin: {

@@ -15,6 +15,8 @@ export async function PATCH(request: NextRequest) {
         }
 
         await dbConnect();
+        const hospitalId = authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId;
+        
         const body = await request.json();
         const { patientId, bpReading, fastingBloodSugar, bmi, conditionControlLevel } = body;
 
@@ -23,7 +25,7 @@ export async function PATCH(request: NextRequest) {
         }
 
         const updatedInfo = await MedicalInfo.findOneAndUpdate(
-            { userId: patientId },
+            { patientId: patientId, hospitalId: hospitalId }, // Fix: userId -> patientId + add hospitalId filter
             {
                 $set: {
                     bpReading,
@@ -37,7 +39,7 @@ export async function PATCH(request: NextRequest) {
         );
 
         if (!updatedInfo) {
-            return NextResponse.json({ error: 'Medical record not found for this patient' }, { status: 404 });
+            return NextResponse.json({ error: 'Medical record not found or unauthorized' }, { status: 404 });
         }
 
         return NextResponse.json({ success: true, medicalInfo: updatedInfo });
