@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
         const nameParts = name.trim().split(' ');
         const firstName = nameParts[0] || name;
         const lastName = nameParts.slice(1).join(' ') || 'Patient';
+        const hospitalId = authUser.role === 'hospital' ? authUser.userId : authUser.hospitalId;
 
         const user = await User.create({
             name: name.trim(),
@@ -53,16 +54,28 @@ export async function POST(request: NextRequest) {
             dateOfBirth: dateOfBirth || undefined,
             password: hashedPassword,
             qrCode: generateQRCode(),
+            hospitalId: hospitalId, // ← FIX: set the hospital ID
             emergencyDetailsCompleted: false
         });
 
-        // Initialize empty medical info record to match signup pattern
+        // Generate and save emergency token
+        const emergencyToken = (await import('uuid')).v4();
+        await User.findByIdAndUpdate(user._id, { emergencyToken });
+
+        // Initialize MedicalInfo and EmergencyToken
         try {
+            const EmergencyToken = (await import('@/models/EmergencyToken')).default;
             await MedicalInfo.create({
                 userId: user._id
             });
+            await EmergencyToken.create({
+                patientId: user._id,
+                token: emergencyToken,
+                tier: 1,
+                isActive: true
+            });
         } catch (medicalError) {
-            console.error('MedicalInfo initialization failed (non-blocking):', medicalError);
+            console.error('Initialization failed:', medicalError);
         }
 
         return NextResponse.json({ 
