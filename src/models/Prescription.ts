@@ -4,13 +4,15 @@ export interface IPrescription extends Document {
     patientId: mongoose.Schema.Types.ObjectId;
     hospitalId: mongoose.Schema.Types.ObjectId;
     doctorId?: mongoose.Schema.Types.ObjectId;
-    doctorName: string; // Optional: Capture responding doctor's name if available, or just use hospital name
-    medicineName: string;
-    dosage: string;
-    frequency: string;
-    route: string;
+    doctorName: string; 
+    medicines: Array<{
+        name: string;
+        dosage: string;
+        frequency: string; // OD, BD, TDS, QID
+        duration: number; // in days
+        route: string;
+    }>;
     instructions: string;
-    duration: number; // in days
     status: 'Active' | 'Completed' | 'Cancelled';
     issuedAt: Date;
     dispensedAt?: Date;
@@ -36,33 +38,16 @@ const prescriptionSchema = new Schema<IPrescription>(
             type: String,
             default: 'Hospital Staff',
         },
-        medicineName: {
-            type: String,
-            required: [true, 'Medicine name is required'],
-            trim: true,
-        },
-        dosage: {
-            type: String,
-            required: [true, 'Dosage is required'],
-            trim: true,
-        },
-        frequency: {
-            type: String,
-            required: [true, 'Frequency is required'],
-            trim: true,
-        },
-        route: {
-            type: String,
-            default: 'Oral',
-            trim: true,
-        },
+        medicines: [{
+            name: { type: String, required: true },
+            dosage: { type: String, required: true },
+            frequency: { type: String, required: true },
+            duration: { type: Number, default: 7 },
+            route: { type: String, default: 'Oral' },
+        }],
         instructions: {
             type: String,
             trim: true,
-        },
-        duration: {
-            type: Number,
-            default: 7,
         },
         status: {
             type: String,

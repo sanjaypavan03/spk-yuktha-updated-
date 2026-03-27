@@ -49,16 +49,12 @@ export async function POST(request: NextRequest) {
 
         console.log('📝 Request Body:', JSON.stringify(body, null, 2));
 
-        const { userId, name, dosage, time, instructions, route, duration } = body;
+        const { userId, medicines, instructions } = body;
 
-        // Map frontend fields (medForm) to schema fields
-        // Frontend: userId, name, dosage, time, instructions, route
-        // Schema: patientId, medicineName, dosage, frequency, instructions, route
-
-        if (!userId || !name || !dosage || !time) {
-            console.error('❌ Missing required fields');
+        if (!userId || !medicines || !Array.isArray(medicines) || medicines.length === 0) {
+            console.error('❌ Missing or invalid medicines array');
             return NextResponse.json({
-                error: 'Missing required fields: userId, name, dosage, or time'
+                error: 'Missing required fields: userId and medicines array'
             }, { status: 400 });
         }
 
@@ -84,12 +80,14 @@ export async function POST(request: NextRequest) {
             hospitalId: resolvedHospitalId,
             doctorId: resolvedDoctorId,
             doctorName: resolvedDoctorName,
-            medicineName: name,
-            dosage: dosage,
-            frequency: time, // mapped from 'time'
+            medicines: medicines.map(m => ({
+                name: m.name,
+                dosage: m.dosage,
+                frequency: m.frequency,
+                duration: m.duration || 7,
+                route: m.route || 'Oral'
+            })),
             instructions: instructions || '',
-            route: route || 'Oral',
-            duration: duration || 7, // Default to 7 if not provided
             creatorEmail: authUser.email
         };
 
@@ -108,44 +106,44 @@ export async function POST(request: NextRequest) {
                 QID: ['07:00', '12:00', '17:00', '21:00'],
             };
 
-            const normalizedFreq = (prescriptionData.frequency || '').toUpperCase();
-            const timeSlots = frequencyMap[normalizedFreq] || ['08:00'];
-            const days = prescriptionData.duration || 7;
-
             const pillEntries: any[] = [];
             
             // Get "today" in IST correctly
             const now = new Date();
-            const istOffset = 330 * 60 * 1000; // 330 minutes in ms
+            const istOffset = 330 * 60 * 1000;
             const istNow = new Date(now.getTime() + istOffset);
             
-            for (let day = 0; day < days; day++) {
-                const date = new Date(istNow);
-                date.setDate(date.getDate() + day);
-                const dateStr = date.toISOString().split('T')[0];
+            for (const med of newPrescription.medicines) {
+                const times = frequencyMap[med.frequency.toUpperCase()] || ['08:00'];
+                const days = med.duration || 7;
 
-                for (const timeSlot of timeSlots) {
-                    pillEntries.push({
-                        patientId: userId,
-                        prescriptionId: newPrescription._id,
-                        medicineName: prescriptionData.medicineName,
-                        dosage: prescriptionData.dosage,
-                        scheduledTime: timeSlot,
-                        date: dateStr,
-                        status: 'pending',
-                        tzOffset: 330,
-                    });
+                for (let day = 0; day < days; day++) {
+                    const date = new Date(istNow);
+                    date.setDate(date.getDate() + day);
+                    const dateStr = date.toISOString().split('T')[0];
+
+                    for (const time of times) {
+                        pillEntries.push({
+                            patientId: userId,
+                            prescriptionId: newPrescription._id,
+                            medicineName: med.name,
+                            dosage: med.dosage,
+                            scheduledTime: time,
+                            date: dateStr,
+                            status: 'pending',
+                            tzOffset: 330,
+                        });
+                    }
                 }
             }
 
-            // Lazy import to avoid circular dependency issues if any
+            // Lazy import to avoid circular dependency issues
             const PillTracking = (await import('@/models/PillTracking')).default;
             await PillTracking.insertMany(pillEntries);
-            console.log(`✅ Generated ${pillEntries.length} pill tracking entries for ${days} days (tzOffset: 330)`);
+            console.log(`✅ Generated ${pillEntries.length} pill tracking entries for multi-medicine prescription`);
 
         } catch (genError) {
             console.error('⚠️ Failed to generate pill tracking entries:', genError);
-            // Non-blocking error, prescription is valid
         }
 
         return NextResponse.json({
